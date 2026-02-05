@@ -1,0 +1,1145 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Envíos - Tienda Color Pinturería</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/lucide@latest/dist/umd/lucide.min.js"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            'app-bg': '#0072BB',
+            primary: '#0072BB',
+            label: '#374151',
+            border: '#E2E8F0',
+            muted: '#64748B',
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    * { -webkit-tap-highlight-color: transparent; }
+    body { font-family: 'Inter', system-ui, sans-serif; }
+    .safe-bottom { padding-bottom: env(safe-area-inset-bottom, 0); }
+    .animate-in { animation: slideUp 0.25s ease-out; }
+    @keyframes slideUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+    .dropdown-arrow { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2364748B'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E"); background-size: 1.25rem; background-position: right 0.75rem center; background-repeat: no-repeat; }
+    input[type="file"] { position: absolute; opacity: 0; width: 0; height: 0; }
+  </style>
+</head>
+<body class="bg-app-bg min-h-screen text-slate-900 safe-bottom">
+  <div id="app" class="pb-24 min-h-screen">
+    <!-- Contenedor centrado: 95% móvil, 50% escritorio -->
+    <div class="w-[95%] md:w-1/2 mx-auto min-h-full">
+      <header class="pt-4 pb-2 flex items-center justify-between">
+        <div class="flex items-center gap-2 min-w-0">
+          <svg class="w-8 h-8 flex-shrink-0 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M18 18.5a1.5 1.5 0 01-1.5-1.5 1.5 1.5 0 011.5-1.5 1.5 1.5 0 011.5 1.5 1.5 1.5 0 01-1.5 1.5m1.5-9l-1.96-2.5H17V6a2 2 0 00-2-2H9a2 2 0 00-2 2v.5H4.46L2.5 9.5 4 11.08V17h1a2 2 0 002 2h10a2 2 0 002-2h1v-5.92L19.5 9.5M9 6h6v.5H9V6m-.5 4h7v5h-7v-5z"/></svg>
+          <h1 class="text-base sm:text-lg font-bold text-white truncate">Envíos - TiendaColor</h1>
+        </div>
+        <p class="text-xs font-medium text-white/90">Pinturerías</p>
+      </header>
+
+      <!-- Filtros (compactos) -->
+      <section class="pt-1 pb-2">
+        <div class="bg-white/10 backdrop-blur rounded-xl shadow-sm p-2 space-y-2">
+          <div>
+            <label for="filter-estado" class="block text-xs font-medium text-white/90 uppercase tracking-wide mb-0.5">Estado</label>
+            <select id="filter-estado" class="w-full rounded-lg bg-white px-2.5 py-2 text-sm text-slate-900 dropdown-arrow appearance-none pr-9 border-0 shadow-sm">
+              <option value="pendientes" selected>Pendientes</option>
+              <option value="completo">Completados</option>
+              <option value="todo">Todo</option>
+            </select>
+          </div>
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label for="filter-sucursal" class="block text-xs font-medium text-white/90 uppercase tracking-wide mb-0.5">Sucursal</label>
+              <select id="filter-sucursal" class="w-full rounded-lg bg-white px-2.5 py-2 text-sm text-slate-900 dropdown-arrow appearance-none pr-9 border-0 shadow-sm">
+                <option value="todo">Todo</option>
+                <option value="Guaymallén">Guaymallén</option>
+                <option value="Maipú">Maipú</option>
+              </select>
+            </div>
+            <div>
+              <label for="filter-fecha" class="block text-xs font-medium text-white/90 uppercase tracking-wide mb-0.5">Fecha</label>
+              <select id="filter-fecha" class="w-full rounded-lg bg-white px-2.5 py-2 text-sm text-slate-900 dropdown-arrow appearance-none pr-9 border-0 shadow-sm">
+                <option value="hoy" selected>Hoy</option>
+                <option value="todo">Todo</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Buscador (solo visible cuando Estado = Completados) -->
+      <section id="search-section" class="hidden pt-2 pb-2">
+        <div class="relative">
+          <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 pointer-events-none"></i>
+          <input type="search" id="search-cliente" placeholder="Buscar por nombre de cliente..." class="w-full rounded-lg border border-slate-300 bg-white pl-9 pr-3 py-2 text-sm text-slate-900 placeholder-slate-500 focus:border-[#FFC107] focus:outline-none focus:ring-1 focus:ring-[#FFC107]" autocomplete="off">
+        </div>
+      </section>
+
+      <!-- Indicadores del dashboard (según filtros activos) -->
+      <section id="resumen-section" class="pt-2 pb-2">
+        <div class="grid grid-cols-3 gap-2">
+          <div class="bg-white/20 backdrop-blur rounded-lg px-2 py-2 text-center">
+            <p class="text-[10px] font-medium text-white/90 uppercase">Pendientes</p>
+            <p id="ind-pendientes" class="text-lg font-bold text-white">0</p>
+          </div>
+          <div id="ind-atrasados-wrap" class="bg-white/20 backdrop-blur rounded-lg px-2 py-2 text-center">
+            <p class="text-[10px] font-medium text-white/90 uppercase">Atrasados</p>
+            <p id="ind-atrasados" class="text-lg font-bold text-white">0</p>
+          </div>
+          <div class="bg-white/20 backdrop-blur rounded-lg px-2 py-2 text-center">
+            <p class="text-[10px] font-medium text-white/90 uppercase">Transf. Pend.</p>
+            <p id="ind-transferencias" class="text-lg font-bold text-white">0</p>
+          </div>
+        </div>
+        <div class="h-0.5 w-full bg-[#FFC107] mt-2" aria-hidden="true"></div>
+      </section>
+
+      <!-- Lista de tarjetas -->
+      <main class="space-y-4">
+        <div id="empty-state" class="hidden bg-white rounded-2xl shadow-lg p-8 text-center">
+          <svg class="w-14 h-14 mx-auto text-slate-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 7l-8 4-8-4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
+          <h2 class="text-lg font-bold text-slate-900">Sin entregas pendientes</h2>
+          <p class="text-sm text-slate-600 mt-1">Todas las entregas han sido completadas.</p>
+          <button type="button" id="link-historial" class="mt-4 text-primary font-medium underline active:scale-95 transition-transform">Ver historial</button>
+        </div>
+        <div id="cards-container" class="space-y-4"></div>
+      </main>
+    </div>
+
+    <!-- FAB Nuevo -->
+    <button type="button" id="btn-new" class="fixed bottom-20 right-4 z-30 w-14 h-14 rounded-full bg-white text-app-bg font-bold text-2xl flex items-center justify-center shadow-lg active:scale-95 transition-transform safe-bottom" aria-label="Nuevo">+</button>
+  </div>
+
+  <!-- Modal Selector de Tipo (Nuevo Envío / Nueva Transferencia) -->
+  <div id="modal-selector-tipo" class="fixed inset-0 z-40 hidden bg-slate-900/80 overflow-y-auto" aria-hidden="true">
+    <div class="min-h-full flex items-center justify-center p-4">
+      <div class="w-full max-w-sm bg-slate-50 rounded-2xl shadow-2xl border-2 border-[#FFC107] p-5 animate-in">
+        <h2 class="text-lg font-bold text-slate-900 text-center mb-4">¿Qué desea crear?</h2>
+        <div class="flex flex-col gap-3">
+          <button type="button" id="btn-tipo-envio" class="flex items-center gap-3 w-full p-4 rounded-xl bg-white border-2 border-[#FFC107]/50 hover:border-[#FFC107] text-slate-900 font-bold text-sm active:scale-95 transition-transform">
+            <img src="icono_camioneta.png" alt="" class="w-8 h-8 object-contain shrink-0" onerror="this.style.display='none';var s=this.nextElementSibling;if(s)s.style.display='block';" /><i data-lucide="truck" class="hidden w-8 h-8 text-[#0072BB] shrink-0"></i>
+            <span>Nuevo Envío</span>
+          </button>
+          <button type="button" id="btn-tipo-transferencia" class="flex items-center gap-3 w-full p-4 rounded-xl bg-white border-2 border-[#FFC107]/50 hover:border-[#FFC107] text-slate-900 font-bold text-sm active:scale-95 transition-transform">
+            <i data-lucide="arrow-left-right" class="w-8 h-8 text-[#0072BB] shrink-0"></i>
+            <span>Nueva Transferencia</span>
+          </button>
+        </div>
+        <button type="button" id="modal-selector-cerrar" class="w-full mt-3 py-2.5 rounded-xl border-2 border-slate-300 text-slate-600 font-medium text-sm active:scale-95 transition-transform">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Nueva / Editar Transferencia -->
+  <div id="modal-form-transferencia" class="fixed inset-0 z-40 hidden bg-slate-900/80 overflow-y-auto" aria-hidden="true">
+    <div class="min-h-full flex items-end sm:items-center justify-center p-0 sm:p-4">
+      <div class="w-[95%] md:w-1/2 max-h-[90vh] bg-slate-50 rounded-t-2xl sm:rounded-2xl overflow-hidden flex flex-col animate-in shadow-2xl mx-auto border-2 border-[#FFC107]">
+        <div class="flex-shrink-0 px-3 py-3 bg-[#0072BB] flex items-center justify-between">
+          <h2 id="modal-title-transferencia" class="text-lg font-bold text-white">Nueva Transferencia</h2>
+          <button type="button" id="modal-transferencia-close" class="p-2 -m-2 rounded-full hover:bg-white/20 text-white active:scale-95 transition-transform" aria-label="Cerrar">
+            <i data-lucide="x" class="w-5 h-5"></i>
+          </button>
+        </div>
+        <form id="form-transferencia" class="flex-1 overflow-y-auto min-h-0">
+          <input type="hidden" id="transferencia-id" name="id">
+          <div id="form-transferencia-error" class="hidden mx-3 mt-2 p-2.5 rounded-lg bg-red-100 border border-red-200 text-red-800 text-sm font-medium" role="alert"></div>
+          <div class="px-3 py-2 space-y-2">
+            <section class="rounded-lg border border-[#FFC107] bg-white p-2.5 space-y-2">
+              <h3 class="text-[10px] font-bold text-slate-900 uppercase tracking-wide flex items-center gap-1"><i data-lucide="calendar" class="w-3.5 h-3.5 text-[#0072BB]"></i> Fecha</h3>
+              <div>
+                <label for="transferencia-fecha" class="block text-xs font-bold text-slate-900 mb-0.5">Fecha</label>
+                <input type="date" id="transferencia-fecha" name="fecha" required class="input-field w-full rounded border border-slate-300 bg-white px-2.5 py-2 text-sm text-slate-900 focus:border-[#FFC107] focus:outline-none focus:ring-1 focus:ring-[#FFC107]">
+              </div>
+            </section>
+            <section class="rounded-lg border border-[#FFC107] bg-white p-2.5 space-y-2">
+              <h3 class="text-[10px] font-bold text-slate-900 uppercase tracking-wide">Sucursales</h3>
+              <div class="grid grid-cols-2 gap-1.5">
+                <div>
+                  <label for="transferencia-desde" class="block text-xs font-bold text-slate-900 mb-0.5">Sucursal Desde</label>
+                  <select id="transferencia-desde" name="sucursalDesde" required class="input-field w-full rounded border border-slate-300 bg-white px-2.5 py-2 text-sm text-slate-900 appearance-none dropdown-arrow pr-8 focus:border-[#FFC107] focus:outline-none focus:ring-1 focus:ring-[#FFC107]">
+                    <option value="Guaymallén">Guaymallén</option>
+                    <option value="Maipú">Maipú</option>
+                  </select>
+                </div>
+                <div>
+                  <label for="transferencia-hasta" class="block text-xs font-bold text-slate-900 mb-0.5">Sucursal Hasta</label>
+                  <select id="transferencia-hasta" name="sucursalHasta" required class="input-field w-full rounded border border-slate-300 bg-white px-2.5 py-2 text-sm text-slate-900 appearance-none dropdown-arrow pr-8 focus:border-[#FFC107] focus:outline-none focus:ring-1 focus:ring-[#FFC107]">
+                    <option value="Guaymallén">Guaymallén</option>
+                    <option value="Maipú">Maipú</option>
+                  </select>
+                </div>
+              </div>
+            </section>
+            <section class="rounded-lg border border-[#FFC107] bg-white p-2.5 space-y-2">
+              <h3 class="text-[10px] font-bold text-slate-900 uppercase tracking-wide flex items-center gap-1"><i data-lucide="message-square" class="w-3.5 h-3.5 text-[#0072BB]"></i> Comentarios</h3>
+              <div>
+                <label for="transferencia-comentarios" class="block text-xs font-bold text-slate-900 mb-0.5">Comentarios</label>
+                <input type="text" id="transferencia-comentarios" name="comentarios" placeholder="Comentarios opcionales..." class="input-field w-full rounded border border-slate-300 bg-white px-2.5 py-2 text-sm text-slate-900 placeholder-slate-400 focus:border-[#FFC107] focus:outline-none focus:ring-1 focus:ring-[#FFC107]">
+              </div>
+            </section>
+            <section class="rounded-lg border border-[#FFC107] bg-white p-2.5 space-y-2">
+              <h3 class="text-[10px] font-bold text-slate-900 uppercase tracking-wide flex items-center gap-1"><i data-lucide="file-text" class="w-3.5 h-3.5 text-[#0072BB]"></i> Cargar PDF</h3>
+              <div class="flex items-center gap-1.5 min-h-[34px]">
+                <label class="rounded border border-slate-300 bg-white px-2 py-2 text-xs text-slate-900 cursor-pointer active:scale-95 transition-transform border-[#FFC107]/50 hover:border-[#FFC107] whitespace-nowrap">Archivo<input type="file" id="transferencia-pdf" name="pdf" accept=".pdf" class="sr-only"></label>
+                <span id="transferencia-pdf-filename" class="text-xs text-slate-500 truncate">Ninguno</span>
+              </div>
+            </section>
+          </div>
+          <div class="flex-shrink-0 p-3 border-t border-slate-200 flex gap-2 bg-slate-50">
+            <button type="button" id="form-transferencia-cancel" class="flex-1 py-2.5 rounded-lg border-2 border-slate-300 text-slate-900 font-bold text-xs active:scale-95 transition-transform">Cancelar</button>
+            <button type="submit" id="form-transferencia-submit" class="flex-1 py-2.5 rounded-lg bg-[#0072BB] text-white font-bold text-xs active:scale-95 transition-transform">Guardar</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Nueva / Editar: 95% móvil, 50% escritorio, centrado -->
+  <div id="modal-form" class="fixed inset-0 z-40 hidden bg-slate-900/80 overflow-y-auto" aria-hidden="true">
+    <div class="min-h-full flex items-end sm:items-center justify-center p-0 sm:p-4">
+      <div class="w-[95%] md:w-1/2 max-h-[90vh] bg-slate-50 rounded-t-2xl sm:rounded-2xl overflow-hidden flex flex-col animate-in shadow-2xl mx-auto border-2 border-[#FFC107]">
+        <div class="flex-shrink-0 px-3 py-3 bg-[#0072BB] flex items-center justify-between">
+          <h2 id="modal-title" class="text-lg font-bold text-white">Nueva Entrega</h2>
+          <button type="button" id="modal-close" class="p-2 -m-2 rounded-full hover:bg-white/20 text-white active:scale-95 transition-transform" aria-label="Cerrar">
+            <i data-lucide="x" class="w-5 h-5"></i>
+          </button>
+        </div>
+        <form id="form-envio" class="flex-1 overflow-y-auto min-h-0">
+          <input type="hidden" id="envio-id" name="id">
+          <div id="form-error" class="hidden mx-3 mt-2 p-2.5 rounded-lg bg-red-100 border border-red-200 text-red-800 text-sm font-medium" role="alert"></div>
+          <div class="px-3 py-2 space-y-2">
+            <!-- Bloque Logística -->
+            <section class="rounded-lg border border-[#FFC107] bg-white p-2.5 space-y-2">
+              <h3 class="text-[10px] font-bold text-slate-900 uppercase tracking-wide flex items-center gap-1"><i data-lucide="calendar" class="w-3.5 h-3.5"></i> Logística</h3>
+              <div class="grid grid-cols-1 gap-1.5">
+                <div>
+                  <label for="fecha" class="block text-xs font-bold text-slate-900 mb-0.5">Fecha</label>
+                  <input type="date" id="fecha" name="fecha" required class="input-field w-full rounded border border-slate-300 bg-white px-2.5 py-2 text-sm text-slate-900 focus:border-[#FFC107] focus:outline-none focus:ring-1 focus:ring-[#FFC107]">
+                </div>
+              </div>
+              <div class="grid grid-cols-2 gap-1.5">
+                <div>
+                  <label for="horaDesde" class="block text-xs font-bold text-slate-900 mb-0.5">Hora desde</label>
+                  <select id="horaDesde" name="horaDesde" required class="input-field w-full rounded border border-slate-300 bg-white px-2.5 py-2 text-sm text-slate-900 appearance-none dropdown-arrow pr-8 focus:border-[#FFC107] focus:outline-none focus:ring-1 focus:ring-[#FFC107]"></select>
+                </div>
+                <div>
+                  <label for="horaHasta" class="block text-xs font-bold text-slate-900 mb-0.5">Hora hasta</label>
+                  <select id="horaHasta" name="horaHasta" required class="input-field w-full rounded border border-slate-300 bg-white px-2.5 py-2 text-sm text-slate-900 appearance-none dropdown-arrow pr-8 focus:border-[#FFC107] focus:outline-none focus:ring-1 focus:ring-[#FFC107]"></select>
+                </div>
+              </div>
+              <div class="grid grid-cols-2 gap-1.5">
+                <div>
+                  <label for="sucursalEnvia" class="block text-xs font-bold text-slate-900 mb-0.5">Sucursal Envía</label>
+                  <select id="sucursalEnvia" name="sucursalEnvia" required class="input-field w-full rounded border border-slate-300 bg-white px-2.5 py-2 text-sm text-slate-900 appearance-none dropdown-arrow pr-8 focus:border-[#FFC107] focus:outline-none focus:ring-1 focus:ring-[#FFC107]">
+                    <option value="Guaymallén">Guaymallén</option>
+                    <option value="Maipú">Maipú</option>
+                  </select>
+                </div>
+                <div>
+                  <label for="sucursalFactura" class="block text-xs font-bold text-slate-900 mb-0.5">Sucursal Factura</label>
+                  <select id="sucursalFactura" name="sucursalFactura" required class="input-field w-full rounded border border-slate-300 bg-white px-2.5 py-2 text-sm text-slate-900 appearance-none dropdown-arrow pr-8 focus:border-[#FFC107] focus:outline-none focus:ring-1 focus:ring-[#FFC107]">
+                    <option value="Guaymallén">Guaymallén</option>
+                    <option value="Maipú">Maipú</option>
+                  </select>
+                </div>
+              </div>
+            </section>
+            <!-- Bloque Cliente -->
+            <section class="rounded-lg border border-[#FFC107] bg-white p-2.5 space-y-2">
+              <h3 class="text-[10px] font-bold text-slate-900 uppercase tracking-wide flex items-center gap-1"><i data-lucide="user" class="w-3.5 h-3.5"></i> Cliente</h3>
+              <div class="grid grid-cols-2 gap-1.5">
+                <div class="col-span-2">
+                  <label for="nombre" class="block text-xs font-bold text-slate-900 mb-0.5">Nombre</label>
+                  <input type="text" id="nombre" name="nombre" required placeholder="Nombre" class="input-field w-full rounded border border-slate-300 bg-white px-2.5 py-2 text-sm text-slate-900 placeholder-slate-400 focus:border-[#FFC107] focus:outline-none focus:ring-1 focus:ring-[#FFC107]">
+                </div>
+                <div>
+                  <label for="telefono" class="block text-xs font-bold text-slate-900 mb-0.5 flex items-center gap-1"><i data-lucide="phone" class="w-3.5 h-3.5"></i> Teléfono</label>
+                  <input type="tel" id="telefono" name="telefono" placeholder="261 123 4567" class="input-field w-full rounded border border-slate-300 bg-white px-2.5 py-2 text-sm text-slate-900 placeholder-slate-400 focus:border-[#FFC107] focus:outline-none focus:ring-1 focus:ring-[#FFC107]">
+                </div>
+              </div>
+            </section>
+            <!-- Bloque Ubicación -->
+            <section class="rounded-lg border border-[#FFC107] bg-white p-2.5 space-y-2">
+              <h3 class="text-[10px] font-bold text-slate-900 uppercase tracking-wide flex items-center gap-1"><i data-lucide="map-pin" class="w-3.5 h-3.5"></i> Ubicación</h3>
+              <div class="space-y-1.5">
+                <div>
+                  <label for="direccion" class="block text-xs font-bold text-slate-900 mb-0.5">Dirección</label>
+                  <input type="text" id="direccion" name="direccion" placeholder="Dirección" class="input-field w-full rounded border border-slate-300 bg-white px-2.5 py-2 text-sm text-slate-900 placeholder-slate-400 focus:border-[#FFC107] focus:outline-none focus:ring-1 focus:ring-[#FFC107]">
+                </div>
+                <div class="grid grid-cols-2 gap-1.5">
+                  <div>
+                    <label for="urlMapa" class="block text-xs font-bold text-slate-900 mb-0.5">Maps (URL)</label>
+                    <input type="url" id="urlMapa" name="urlMapa" placeholder="https://..." class="input-field w-full rounded border border-slate-300 bg-white px-2.5 py-2 text-sm text-slate-900 placeholder-slate-400 focus:border-[#FFC107] focus:outline-none focus:ring-1 focus:ring-[#FFC107]">
+                  </div>
+                  <div>
+                    <label for="referencia" class="block text-xs font-bold text-slate-900 mb-0.5 flex items-center gap-1"><i data-lucide="tag" class="w-3.5 h-3.5 text-[#0072BB]"></i> Referencia</label>
+                    <input type="text" id="referencia" name="referencia" placeholder="Ref." class="input-field w-full rounded border border-slate-300 bg-white px-2.5 py-2 text-sm text-slate-900 placeholder-slate-400 focus:border-[#FFC107] focus:outline-none focus:ring-1 focus:ring-[#FFC107]">
+                  </div>
+                </div>
+              </div>
+            </section>
+            <!-- Bloque Mercadería -->
+            <section class="rounded-lg border border-[#FFC107] bg-white p-2.5 space-y-2">
+              <h3 class="text-[10px] font-bold text-slate-900 uppercase tracking-wide">Mercadería</h3>
+              <div class="grid grid-cols-2 gap-1.5">
+                <div>
+                  <label for="metodoPago" class="block text-xs font-bold text-slate-900 mb-0.5">Método de pago</label>
+                  <select id="metodoPago" name="metodoPago" required class="input-field w-full rounded border border-slate-300 bg-white px-2.5 py-2 text-sm text-slate-900 appearance-none dropdown-arrow pr-8 focus:border-[#FFC107] focus:outline-none focus:ring-1 focus:ring-[#FFC107]">
+                    <option value="">Seleccionar...</option>
+                    <option value="Pagado">Pagado</option>
+                    <option value="Efectivo">Efectivo</option>
+                    <option value="Transferencia">Transferencia</option>
+                    <option value="Tarjeta">Tarjeta</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="block text-xs font-bold text-slate-900 mb-0.5 flex items-center gap-1"><i data-lucide="file-text" class="w-3.5 h-3.5"></i> PDF adjunto</label>
+                  <div class="flex items-center gap-1.5 min-h-[34px]">
+                    <label class="rounded border border-slate-300 bg-white px-2 py-2 text-xs text-slate-900 cursor-pointer active:scale-95 transition-transform border-[#FFC107]/50 hover:border-[#FFC107] whitespace-nowrap">Archivo<input type="file" id="pdfFile" name="pdfFile" accept=".pdf" class="sr-only"></label>
+                    <span id="pdf-filename" class="text-xs text-slate-500 truncate">Ninguno</span>
+                  </div>
+                </div>
+              </div>
+            </section>
+          </div>
+          <div class="flex-shrink-0 p-3 border-t border-slate-200 flex gap-2 bg-slate-50">
+            <button type="button" id="form-cancel" class="flex-1 py-2.5 rounded-lg border-2 border-slate-300 text-slate-900 font-bold text-xs active:scale-95 transition-transform">Cancelar</button>
+            <button type="submit" id="form-submit" class="flex-1 py-2.5 rounded-lg bg-[#0072BB] text-white font-bold text-xs active:scale-95 transition-transform">Crear Entrega</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Ver Envío (detalle + acciones) -->
+  <div id="modal-ver" class="fixed inset-0 z-40 hidden bg-slate-900/80 overflow-y-auto" aria-hidden="true">
+    <div class="min-h-full flex items-end sm:items-center justify-center p-0 sm:p-4">
+      <div class="w-full max-w-lg max-h-[90vh] bg-slate-50 rounded-t-2xl sm:rounded-2xl overflow-hidden flex flex-col animate-in shadow-2xl border-2 border-[#FFC107]">
+        <div class="flex-shrink-0 px-5 py-4 bg-[#0072BB] flex items-center justify-between">
+          <h2 id="modal-ver-title" class="text-lg font-bold text-white">Detalle del envío</h2>
+          <button type="button" id="modal-ver-close" class="p-2 -m-2 rounded-full hover:bg-white/20 text-white active:scale-95 transition-transform">
+            <i data-lucide="x" class="w-5 h-5"></i>
+          </button>
+        </div>
+        <div id="modal-ver-content" class="flex-1 overflow-y-auto p-5 space-y-4 bg-slate-50 text-slate-900"></div>
+        <div id="modal-ver-actions" class="flex-shrink-0 p-5 border-t border-slate-200 space-y-3 bg-slate-50"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal confirmación eliminar -->
+  <div id="modal-confirm-delete" class="fixed inset-0 z-50 hidden bg-slate-900/80 overflow-y-auto" aria-hidden="true">
+    <div class="min-h-full flex items-center justify-center p-4">
+      <div class="w-full max-w-sm bg-slate-100 rounded-2xl shadow-xl border-2 border-[#FFC107] p-5 animate-in">
+        <p class="text-slate-800 font-medium text-center">¿Eliminar este envío?</p>
+        <p class="text-slate-600 text-sm text-center mt-1">Esta acción no se puede deshacer.</p>
+        <div class="flex gap-2 mt-4">
+          <button type="button" id="modal-delete-cancel" class="flex-1 py-2.5 rounded-xl border-2 border-slate-300 text-slate-700 font-bold text-sm active:scale-95 transition-transform">Cancelar</button>
+          <button type="button" id="modal-delete-confirm" class="flex-1 py-2.5 rounded-xl bg-[#0072BB] text-white font-bold text-sm active:scale-95 transition-transform">Confirmar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const STORAGE_KEY = 'envios_tiendacolor';
+    // Horarios de 08:00 a 19:00, intervalos de 30 minutos
+    const HORAS = [];
+    for (let h = 8; h <= 19; h++) {
+      for (let m = 0; m < 60; m += 30) {
+        if (h === 19 && m === 30) break;
+        HORAS.push(`${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`);
+      }
+    }
+
+    function getEnvios() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        return raw ? JSON.parse(raw) : [];
+      } catch {
+        return [];
+      }
+    }
+
+    function setEnvios(arr) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(arr));
+    }
+
+    function esTransferencia(item) {
+      if (!item) return false;
+      if (item.tipo === 'transferencia') return true;
+      // Reconocer transferencias guardadas sin 'tipo' (compatibilidad)
+      return typeof item.sucursalDesde === 'string' && typeof item.sucursalHasta === 'string' && !item.envio;
+    }
+
+    /** Tarjeta visible en vista principal: no entregado, o entregado pero con transferencia pendiente (solo envíos) */
+    function visibleEnVistaPrincipal(envio) {
+      if (esTransferencia(envio)) return true;
+      if (!envio || !envio.envio) return false;
+      if (!envio.entregado) return true;
+      const requiereTransferencia = envio.envio.sucursalEnvia !== envio.envio.sucursalFactura;
+      if (requiereTransferencia && !envio.mercaderiaTransferida) return true;
+      return false;
+    }
+
+    function esCompleto(item) {
+      if (esTransferencia(item)) return false;
+      if (!item || !item.envio) return false;
+      if (!item.entregado) return false;
+      const requiereTransferencia = item.envio.sucursalEnvia !== item.envio.sucursalFactura;
+      return !requiereTransferencia || item.mercaderiaTransferida;
+    }
+
+    function getFilteredEnvios() {
+      const estado = document.getElementById('filter-estado').value;
+      const sucursal = document.getElementById('filter-sucursal').value;
+      const fecha = document.getElementById('filter-fecha').value;
+      const hoy = new Date().toISOString().slice(0, 10);
+      let list = getEnvios();
+      if (estado === 'pendientes') list = list.filter(item => esTransferencia(item) || visibleEnVistaPrincipal(item));
+      else if (estado === 'completo') list = list.filter(item => esTransferencia(item) || esCompleto(item));
+      if (sucursal !== 'todo') {
+        list = list.filter(item => {
+          if (esTransferencia(item)) return item.sucursalDesde === sucursal || item.sucursalHasta === sucursal;
+          return item.envio && item.envio.sucursalEnvia === sucursal;
+        });
+      }
+      if (fecha === 'hoy') {
+        list = list.filter(item => {
+          if (esTransferencia(item)) return (item.fecha || '') === hoy;
+          return item.envio && item.envio.fecha === hoy;
+        });
+      }
+      return list;
+    }
+
+    function fillHoras() {
+      const desde = document.getElementById('horaDesde');
+      const hasta = document.getElementById('horaHasta');
+      desde.innerHTML = HORAS.map(h => `<option value="${h}">${h}</option>`).join('');
+      hasta.innerHTML = HORAS.map(h => `<option value="${h}">${h}</option>`).join('');
+    }
+
+    document.getElementById('pdfFile').addEventListener('change', function() {
+      document.getElementById('pdf-filename').textContent = this.files.length ? this.files[0].name : 'Ninguno';
+    });
+
+    // Al cambiar "Sucursal Envía", actualizar "Sucursal Factura" al mismo valor (no se modifica si el usuario cambia solo Factura)
+    document.getElementById('sucursalEnvia').addEventListener('change', function() {
+      document.getElementById('sucursalFactura').value = this.value;
+    });
+
+    function openModalForm(envio = null, reutilizar = false) {
+      const modal = document.getElementById('modal-form');
+      const title = document.getElementById('modal-title');
+      const submitBtn = document.getElementById('form-submit');
+      const idField = document.getElementById('envio-id');
+      const hoy = new Date().toISOString().slice(0, 10);
+      document.getElementById('fecha').setAttribute('min', hoy);
+      document.getElementById('pdfFile').value = '';
+      document.getElementById('pdf-filename').textContent = 'Ninguno';
+      document.getElementById('form-error').classList.add('hidden');
+      document.getElementById('form-error').textContent = '';
+
+      if (reutilizar && envio) {
+        title.textContent = 'Reutilizar envío';
+        submitBtn.textContent = 'Crear Entrega';
+        idField.value = '';
+        document.getElementById('fecha').value = new Date().toISOString().slice(0, 10);
+        document.getElementById('horaDesde').value = envio.envio.horaDesde || '08:00';
+        document.getElementById('horaHasta').value = envio.envio.horaHasta || '12:00';
+        document.getElementById('sucursalEnvia').value = envio.envio.sucursalEnvia;
+        document.getElementById('sucursalFactura').value = envio.envio.sucursalFactura || envio.envio.sucursalEnvia;
+        document.getElementById('nombre').value = envio.cliente.nombre || '';
+        document.getElementById('telefono').value = envio.cliente.telefono || '';
+        document.getElementById('direccion').value = envio.cliente.direccion || '';
+        document.getElementById('urlMapa').value = envio.cliente.urlMapa || '';
+        document.getElementById('referencia').value = envio.cliente.referencia || '';
+        document.getElementById('metodoPago').value = '';
+      } else if (envio) {
+        title.textContent = 'Editar Entrega';
+        submitBtn.textContent = 'Guardar';
+        idField.value = envio.id;
+        document.getElementById('fecha').value = envio.envio.fecha;
+        document.getElementById('horaDesde').value = envio.envio.horaDesde;
+        document.getElementById('horaHasta').value = envio.envio.horaHasta;
+        document.getElementById('sucursalEnvia').value = envio.envio.sucursalEnvia;
+        document.getElementById('sucursalFactura').value = envio.envio.sucursalFactura || envio.envio.sucursalEnvia;
+        document.getElementById('nombre').value = envio.cliente.nombre || '';
+        document.getElementById('telefono').value = envio.cliente.telefono || '';
+        document.getElementById('direccion').value = envio.cliente.direccion || '';
+        document.getElementById('urlMapa').value = envio.cliente.urlMapa || '';
+        document.getElementById('referencia').value = envio.cliente.referencia || '';
+        document.getElementById('metodoPago').value = envio.mercaderia?.metodoPago || 'Pagado';
+        if (envio.mercaderia?.pdfNombre) document.getElementById('pdf-filename').textContent = envio.mercaderia.pdfNombre;
+      } else {
+        title.textContent = 'Nueva Entrega';
+        submitBtn.textContent = 'Crear Entrega';
+        idField.value = '';
+        document.getElementById('form-envio').reset();
+        document.getElementById('fecha').value = new Date().toISOString().slice(0, 10);
+        document.getElementById('horaDesde').value = '08:00';
+        document.getElementById('horaHasta').value = '12:00';
+        document.getElementById('sucursalFactura').value = 'Guaymallén';
+        document.getElementById('metodoPago').value = 'Pagado';
+      }
+      modal.classList.remove('hidden');
+      modal.setAttribute('aria-hidden', 'false');
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+
+    function closeModalForm() {
+      document.getElementById('modal-form').classList.add('hidden');
+      document.getElementById('modal-form').setAttribute('aria-hidden', 'true');
+    }
+
+    function openModalSelectorTipo() {
+      document.getElementById('modal-selector-tipo').classList.remove('hidden');
+      document.getElementById('modal-selector-tipo').setAttribute('aria-hidden', 'false');
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+    function closeModalSelectorTipo() {
+      document.getElementById('modal-selector-tipo').classList.add('hidden');
+      document.getElementById('modal-selector-tipo').setAttribute('aria-hidden', 'true');
+    }
+
+    function openModalFormTransferencia(transfer = null) {
+      const modal = document.getElementById('modal-form-transferencia');
+      const title = document.getElementById('modal-title-transferencia');
+      const idField = document.getElementById('transferencia-id');
+      const hoy = new Date().toISOString().slice(0, 10);
+      const fechaEl = document.getElementById('transferencia-fecha');
+      if (fechaEl) fechaEl.setAttribute('min', hoy);
+      document.getElementById('transferencia-pdf').value = '';
+      document.getElementById('transferencia-pdf-filename').textContent = 'Ninguno';
+      document.getElementById('form-transferencia-error').classList.add('hidden');
+      document.getElementById('form-transferencia-error').textContent = '';
+      if (transfer) {
+        title.textContent = 'Editar Transferencia';
+        idField.value = transfer.id;
+        if (fechaEl) fechaEl.value = transfer.fecha || hoy;
+        document.getElementById('transferencia-desde').value = transfer.sucursalDesde;
+        document.getElementById('transferencia-hasta').value = transfer.sucursalHasta;
+        document.getElementById('transferencia-comentarios').value = transfer.comentarios || transfer.detalle || '';
+        if (transfer.pdfNombre) document.getElementById('transferencia-pdf-filename').textContent = transfer.pdfNombre;
+      } else {
+        title.textContent = 'Nueva Transferencia';
+        idField.value = '';
+        document.getElementById('form-transferencia').reset();
+        if (fechaEl) fechaEl.value = hoy;
+      }
+      modal.classList.remove('hidden');
+      modal.setAttribute('aria-hidden', 'false');
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+    function closeModalFormTransferencia() {
+      document.getElementById('modal-form-transferencia').classList.add('hidden');
+      document.getElementById('modal-form-transferencia').setAttribute('aria-hidden', 'true');
+    }
+
+    function openModalVer(envio) {
+      document.getElementById('modal-ver-title').textContent = 'Detalle del envío';
+      const modal = document.getElementById('modal-ver');
+      const content = document.getElementById('modal-ver-content');
+      const actions = document.getElementById('modal-ver-actions');
+      const tel = (envio.cliente.telefono || '').replace(/\s/g, '');
+      const urlMapa = (envio.cliente.urlMapa || '').trim();
+      const pdf = envio.mercaderia?.pdfBase64;
+      const requiereTransferencia = envio.envio.sucursalEnvia !== envio.envio.sucursalFactura;
+
+      const ref = (envio.cliente.referencia || '').trim();
+      content.innerHTML = `
+        <div class="space-y-3 text-slate-900">
+          <p class="text-sm flex items-center gap-2"><i data-lucide="user" class="w-4 h-4 shrink-0 text-[#0072BB]"></i><span class="font-bold text-slate-900">Nombre:</span> ${escapeHtml(envio.cliente.nombre)}</p>
+          <p class="text-sm flex items-center gap-2"><i data-lucide="map-pin" class="w-4 h-4 shrink-0 text-[#0072BB]"></i><span class="font-bold text-slate-900">Dirección:</span> ${escapeHtml(envio.cliente.direccion || '-')}</p>
+          <p class="text-sm flex items-center gap-2"><i data-lucide="tag" class="w-4 h-4 shrink-0 text-[#0072BB]"></i><span class="font-bold text-slate-900">Referencia:</span> ${escapeHtml(ref || '-')}</p>
+          <p class="text-sm flex items-center gap-2"><i data-lucide="calendar" class="w-4 h-4 shrink-0 text-[#0072BB]"></i><span class="font-bold text-slate-900">Fecha:</span> ${formatFechaDDMMYYYY(envio.envio.fecha)}</p>
+          <p class="text-sm flex items-center gap-2"><i data-lucide="clock" class="w-4 h-4 shrink-0 text-[#0072BB]"></i><span class="font-bold text-slate-900">Horario:</span> ${envio.envio.horaDesde} - ${envio.envio.horaHasta}</p>
+          <p class="text-sm flex items-center gap-2"><i data-lucide="store" class="w-4 h-4 shrink-0 text-[#0072BB]"></i><span class="font-bold text-slate-900">Sucursal:</span> ${escapeHtml(envio.envio.sucursalEnvia)}${requiereTransferencia ? ' (Factura: ' + escapeHtml(envio.envio.sucursalFactura) + ')' : ''}</p>
+        </div>
+        <div class="flex flex-wrap gap-2 pt-2">
+          ${tel ? `<a href="tel:${escapeHtml(tel)}" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white border-2 border-[#FFC107]/50 hover:border-[#FFC107] text-slate-900 font-bold text-sm active:scale-95 transition-transform"><i data-lucide="phone" class="w-5 h-5 text-[#0072BB]"></i> Llamar</a>` : ''}
+          ${urlMapa ? `<a href="${escapeHtml(urlMapa)}" target="_blank" rel="noopener" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white border-2 border-[#FFC107]/50 hover:border-[#FFC107] text-slate-900 font-bold text-sm active:scale-95 transition-transform"><i data-lucide="map-pin" class="w-5 h-5 text-[#0072BB]"></i> Ubicación</a>` : ''}
+          ${pdf ? `<button type="button" id="btn-pdf-ver" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white border-2 border-[#FFC107]/50 hover:border-[#FFC107] text-slate-900 font-bold text-sm active:scale-95 transition-transform"><i data-lucide="file-text" class="w-5 h-5 text-[#0072BB]"></i> Ver PDF</button>` : '<button type="button" disabled class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white border-2 border-[#FFC107]/50 text-slate-400 font-bold text-sm cursor-default"><i data-lucide="file-text" class="w-5 h-5 text-[#0072BB]"></i> Sin PDF</button>'}
+        </div>
+      `;
+
+      if (pdf) {
+        content.querySelector('#btn-pdf-ver').addEventListener('click', () => {
+          const w = window.open('', '_blank');
+          w.document.write(`
+            <!DOCTYPE html><html><head><meta charset="utf-8"><title>PDF</title></head><body style="margin:0;height:100vh;">
+            <embed src="data:application/pdf;base64,${pdf}" type="application/pdf" width="100%" height="100%" />
+            <p style="padding:12px"><a href="data:application/pdf;base64,${pdf}" download="envio.pdf">Descargar PDF</a></p>
+            </body></html>
+          `);
+          w.document.close();
+        });
+      }
+
+      const entregadoDone = envio.entregado;
+      const transferidaDone = envio.mercaderiaTransferida;
+      actions.innerHTML = `
+        <button type="button" id="modal-btn-entregado" class="w-full py-4 rounded-xl font-bold text-base active:scale-95 transition-transform min-h-[48px] ${entregadoDone ? 'bg-slate-200 text-slate-500' : 'text-white bg-[#0072BB]'}">
+          ${entregadoDone ? '<span class="inline-flex items-center gap-2"><i data-lucide="check" class="w-5 h-5 text-[#0072BB]"></i> Entregado</span>' : 'Entregado'}
+        </button>
+        ${requiereTransferencia ? `<button type="button" id="modal-btn-transferida" class="w-full py-4 rounded-xl font-bold text-base active:scale-95 transition-transform min-h-[48px] ${transferidaDone ? 'bg-slate-200 text-slate-500' : 'text-white bg-[#0072BB]'}">
+          ${transferidaDone ? '<span class="inline-flex items-center gap-2"><i data-lucide="check" class="w-5 h-5 text-[#0072BB]"></i> Mercadería Transferida</span>' : 'Mercadería Transferida'}
+        </button>` : ''}
+      `;
+
+      const btnEntregado = actions.querySelector('#modal-btn-entregado');
+      btnEntregado.addEventListener('click', () => {
+        toggleEntregado(envio.id);
+        closeModalVer();
+        renderCards();
+      });
+      const btnTransferida = actions.querySelector('#modal-btn-transferida');
+      if (btnTransferida) {
+        btnTransferida.addEventListener('click', () => {
+          toggleTransferido(envio.id);
+          closeModalVer();
+          renderCards();
+        });
+      }
+
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+      modal.classList.remove('hidden');
+      modal.setAttribute('aria-hidden', 'false');
+    }
+
+    function closeModalVer() {
+      document.getElementById('modal-ver').classList.add('hidden');
+      document.getElementById('modal-ver').setAttribute('aria-hidden', 'true');
+    }
+
+    function openModalVerTransferencia(transfer) {
+      const modal = document.getElementById('modal-ver');
+      const content = document.getElementById('modal-ver-content');
+      const actions = document.getElementById('modal-ver-actions');
+      document.getElementById('modal-ver-title').textContent = 'Detalle de la transferencia';
+      const pdf = transfer.pdfBase64;
+      const comentarios = transfer.comentarios || transfer.detalle || '-';
+      const fechaTransf = transfer.fecha ? formatFechaDDMMYYYY(transfer.fecha) : '-';
+      content.innerHTML = `
+        <div class="space-y-3 text-slate-900">
+          <p class="text-sm flex items-center gap-2"><i data-lucide="calendar" class="w-4 h-4 shrink-0 text-[#0072BB]"></i><span class="font-bold text-slate-900">Fecha:</span> ${escapeHtml(fechaTransf)}</p>
+          <p class="text-sm flex items-center gap-2"><i data-lucide="store" class="w-4 h-4 shrink-0 text-[#0072BB]"></i><span class="font-bold text-slate-900">Desde:</span> ${escapeHtml(transfer.sucursalDesde)}</p>
+          <p class="text-sm flex items-center gap-2"><i data-lucide="store" class="w-4 h-4 shrink-0 text-[#0072BB]"></i><span class="font-bold text-slate-900">Hasta:</span> ${escapeHtml(transfer.sucursalHasta)}</p>
+          <p class="text-sm flex items-center gap-2"><i data-lucide="message-square" class="w-4 h-4 shrink-0 text-[#0072BB]"></i><span class="font-bold text-slate-900">Comentarios:</span> ${escapeHtml(comentarios)}</p>
+        </div>
+        <div class="flex flex-wrap gap-2 pt-2">
+          ${pdf ? `<button type="button" id="btn-pdf-ver-transf" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white border-2 border-[#FFC107]/50 hover:border-[#FFC107] text-slate-900 font-bold text-sm active:scale-95 transition-transform"><i data-lucide="file-text" class="w-5 h-5 text-[#0072BB]"></i> Ver PDF</button>` : '<button type="button" disabled class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white border-2 border-[#FFC107]/50 hover:border-[#FFC107] text-slate-400 font-bold text-sm cursor-default"><i data-lucide="file-text" class="w-5 h-5 text-[#0072BB]"></i> Sin PDF</button>'}
+        </div>
+      `;
+      if (pdf) {
+        content.querySelector('#btn-pdf-ver-transf').addEventListener('click', () => {
+          const w = window.open('', '_blank');
+          w.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8"><title>PDF</title></head><body style="margin:0;height:100vh;"><embed src="data:application/pdf;base64,${pdf}" type="application/pdf" width="100%" height="100%" /></body></html>`);
+          w.document.close();
+        });
+      }
+      actions.innerHTML = '';
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+      modal.classList.remove('hidden');
+      modal.setAttribute('aria-hidden', 'false');
+    }
+
+    function escapeHtml(s) {
+      if (s == null) return '';
+      const div = document.createElement('div');
+      div.textContent = s;
+      return div.innerHTML;
+    }
+
+    /** Formatea fecha YYYY-MM-DD a dd/mm/yyyy (siempre dos dígitos día y mes) */
+    function formatFechaDDMMYYYY(isoDate) {
+      if (!isoDate) return '';
+      const [y, m, d] = isoDate.split('-');
+      return [d.padStart(2, '0'), m.padStart(2, '0'), y].join('/');
+    }
+
+    /** Fecha con día de la semana: "Lunes, 05/02/2026" (primera letra en mayúscula) */
+    function formatFechaConDia(isoDate) {
+      if (!isoDate) return '';
+      const date = new Date(isoDate + 'T12:00:00');
+      const diaSemana = date.toLocaleDateString('es-AR', { weekday: 'long' });
+      const capitalizado = diaSemana.charAt(0).toUpperCase() + diaSemana.slice(1);
+      return capitalizado + ', ' + formatFechaDDMMYYYY(isoDate);
+    }
+
+    function isAtrasado(envio) {
+      if (!envio || !envio.envio || !envio.envio.fecha || !envio.envio.horaHasta) return false;
+      if (envio.entregado) return false;
+      const fin = new Date(envio.envio.fecha + 'T' + envio.envio.horaHasta);
+      return fin < new Date();
+    }
+
+    /** Transferencia atrasada: fecha anterior a hoy */
+    function isAtrasadoTransfer(transfer) {
+      if (!transfer || !transfer.fecha) return false;
+      const hoy = new Date().toISOString().slice(0, 10);
+      return transfer.fecha < hoy;
+    }
+
+    /** Indicadores según lo que el usuario ve con los filtros actuales */
+    function updateResumen() {
+      const list = getFilteredEnvios();
+      const pendientes = list.length;
+      const atrasados = list.filter(e => esTransferencia(e) ? isAtrasadoTransfer(e) : (e.envio && isAtrasado(e))).length;
+      const transferencias = list.filter(e => !esTransferencia(e) && e.envio && e.envio.sucursalEnvia !== e.envio.sucursalFactura && !e.mercaderiaTransferida).length;
+      document.getElementById('ind-pendientes').textContent = pendientes;
+      document.getElementById('ind-atrasados').textContent = atrasados;
+      document.getElementById('ind-transferencias').textContent = transferencias;
+      const wrap = document.getElementById('ind-atrasados-wrap');
+      if (atrasados > 0) {
+        wrap.classList.remove('bg-white/20');
+        wrap.classList.add('bg-red-500/90');
+      } else {
+        wrap.classList.add('bg-white/20');
+        wrap.classList.remove('bg-red-500/90');
+      }
+    }
+
+    function updateEmptyStateContent() {
+      const empty = document.getElementById('empty-state');
+      const estado = document.getElementById('filter-estado').value;
+      const titulo = empty.querySelector('h2');
+      const desc = empty.querySelector('p');
+      const link = document.getElementById('link-historial');
+      if (estado === 'completo') {
+        titulo.textContent = 'Sin entregas en Completados';
+        desc.textContent = 'No hay entregas en el historial.';
+        link.textContent = 'Ver pendientes';
+        link.dataset.action = 'pendientes';
+      } else {
+        titulo.textContent = 'Sin entregas pendientes';
+        desc.textContent = 'Todas las entregas han sido completadas.';
+        link.textContent = 'Ver historial';
+        link.dataset.action = 'historial';
+      }
+    }
+
+    function renderCards() {
+      try {
+      updateResumen();
+      const estado = document.getElementById('filter-estado').value;
+      const searchSection = document.getElementById('search-section');
+      const searchInput = document.getElementById('search-cliente');
+      if (estado === 'completo') {
+        searchSection.classList.remove('hidden');
+      } else {
+        searchSection.classList.add('hidden');
+        if (searchInput) searchInput.value = '';
+      }
+
+      const container = document.getElementById('cards-container');
+      const empty = document.getElementById('empty-state');
+      if (!container || !empty) return;
+      let envios = getFilteredEnvios().filter(item => {
+        if (esTransferencia(item)) return true;
+        return item && item.envio && item.cliente;
+      });
+      const searchEl = document.getElementById('search-cliente');
+      const searchTerm = (searchEl && searchEl.value) ? String(searchEl.value).trim().toLowerCase() : '';
+      if (estado === 'completo' && searchTerm) {
+        envios = envios.filter(e => !esTransferencia(e) && (e.cliente?.nombre || '').toLowerCase().includes(searchTerm));
+      }
+      // Ordenar: envíos por fecha/hora; transferencias por fecha (más cercanos primero)
+      envios.sort((a, b) => {
+        if (esTransferencia(a) && esTransferencia(b)) {
+          const dateA = (a.fecha || '') ? new Date(a.fecha + 'T12:00:00') : new Date(0);
+          const dateB = (b.fecha || '') ? new Date(b.fecha + 'T12:00:00') : new Date(0);
+          return dateA - dateB;
+        }
+        if (esTransferencia(a)) return 1;
+        if (esTransferencia(b)) return -1;
+        const dateA = (a.envio && a.envio.fecha && a.envio.horaHasta) ? new Date(a.envio.fecha + 'T' + a.envio.horaHasta) : new Date(0);
+        const dateB = (b.envio && b.envio.fecha && b.envio.horaHasta) ? new Date(b.envio.fecha + 'T' + b.envio.horaHasta) : new Date(0);
+        return dateA - dateB;
+      });
+
+      if (envios.length === 0) {
+        container.innerHTML = '';
+        updateEmptyStateContent();
+        empty.classList.remove('hidden');
+        return;
+      }
+      empty.classList.add('hidden');
+
+      container.innerHTML = envios.map(item => {
+        const isTransf = esTransferencia(item);
+        if (isTransf) {
+          const textoDetalle = (item.comentarios || item.detalle || '-').toString();
+          const desde = (item.sucursalDesde || '').toString();
+          const hasta = (item.sucursalHasta || '').toString();
+          const rutaCol3 = escapeHtml(desde) + ' → ' + escapeHtml(hasta);
+          const atrasadoTransf = isAtrasadoTransfer(item);
+          const fechaTransf = (item.fecha || '').toString();
+          const fechaConDiaTransf = fechaTransf ? formatFechaConDia(fechaTransf) : '—';
+          const [diaSemanaTransf, ...restoFechaTransf] = fechaConDiaTransf.split(', ');
+          const ddmmTransf = restoFechaTransf.length ? restoFechaTransf.join(', ').split('/').slice(0, 2).join('/') : '—';
+          return `
+          <article class="bg-slate-50 rounded-2xl border-2 overflow-hidden animate-in text-slate-900 shadow-sm flex ${atrasadoTransf ? 'ring-2 ring-red-500 border-red-500' : 'border-[#FFC107]'}" data-id="${escapeHtml(item.id)}" data-tipo="transferencia">
+            <div class="w-12 min-w-[3rem] flex-shrink-0 bg-sky-100 flex flex-col items-center justify-center py-3 px-1 border-r-2 border-sky-200">
+              <svg class="w-6 h-6 text-[#0072BB] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/></svg>
+              <span class="text-xs font-bold text-slate-800 uppercase mt-1.5 text-center leading-tight">TRANSF.</span>
+            </div>
+            <div class="flex-1 min-w-0">
+              ${atrasadoTransf ? '<div class="mx-2 mt-2 rounded-xl bg-[#FFC107] border border-amber-600/30 flex items-center justify-center gap-1.5 py-2 px-3"><svg class="w-4 h-4 text-amber-700 shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg><span class="text-sm font-bold text-slate-900">Atrasado</span></div>' : ''}
+              <div class="grid grid-cols-3 bg-[#FFC107] min-h-[3rem]">
+                <div class="flex items-center justify-center p-2 text-center"><span class="text-slate-900 text-sm font-bold">${escapeHtml(desde)}</span></div>
+                <div class="flex flex-col items-center justify-center p-2 text-center">
+                  <span class="block text-slate-900 text-xs leading-tight font-normal">${escapeHtml(ddmmTransf)}</span>
+                  <span class="block text-slate-900 text-xs font-bold leading-tight mt-0.5">${escapeHtml(fechaTransf ? diaSemanaTransf : '—')}</span>
+                </div>
+                <div class="flex flex-col items-center justify-center p-2 text-center">
+                  <span class="block text-slate-900 text-xs font-medium leading-tight">${rutaCol3}</span>
+                </div>
+              </div>
+              <div class="px-3 py-2.5 bg-slate-50">
+                <div class="flex items-center gap-2">
+                  <svg class="w-4 h-4 text-[#0072BB] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+                  <h3 class="font-bold text-slate-900 text-sm">${escapeHtml(textoDetalle)}</h3>
+                </div>
+                <div class="flex flex-wrap gap-2 mt-3 pt-2 border-t border-slate-200">
+                  <button type="button" class="btn-card-eliminar inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium bg-slate-100 text-slate-900 active:scale-95 transition-transform">Eliminar</button>
+                  <button type="button" class="btn-card-editar inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium bg-slate-100 text-slate-900 active:scale-95 transition-transform">Editar</button>
+                  <button type="button" class="btn-card-ver inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium bg-app-bg text-white active:scale-95 transition-transform">Ver Transferencia</button>
+                </div>
+              </div>
+            </div>
+          </article>
+        `;
+        }
+        const envio = item;
+        const requiereTransferencia = envio.envio.sucursalEnvia !== envio.envio.sucursalFactura;
+        const pendienteTransferencia = envio.entregado && requiereTransferencia && !envio.mercaderiaTransferida;
+        const atrasado = isAtrasado(envio);
+        const fechaConDia = formatFechaConDia(envio.envio.fecha);
+        const [diaSemana, ...restoFecha] = fechaConDia.split(', ');
+        const fechaSolo = restoFecha.join(', ');
+        const ddmm = fechaSolo.split('/').slice(0, 2).join('/');
+        const horaRango = `${envio.envio.horaDesde} - ${envio.envio.horaHasta}`;
+        return `
+          <article class="bg-slate-50 rounded-2xl border-2 overflow-hidden animate-in text-slate-900 shadow-sm flex border-[#FFC107]" data-id="${escapeHtml(envio.id)}" data-tipo="envio">
+            <div class="w-12 min-w-[3rem] flex-shrink-0 bg-blue-100 flex flex-col items-center justify-center py-3 px-1 border-r-2 border-blue-200">
+              <img src="icono_camioneta.png" alt="" class="w-6 h-6 object-contain shrink-0 envio-icon-img" onerror="this.style.display='none';var s=this.nextElementSibling;if(s)s.style.display='block';" />
+              <svg class="w-6 h-6 text-[#0072BB] shrink-0 hidden envio-icon-fallback" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 18.5a1.5 1.5 0 01-1.5-1.5 1.5 1.5 0 011.5-1.5 1.5 1.5 0 011.5 1.5 1.5 1.5 0 01-1.5 1.5m1.5-9l-1.96-2.5H17V6a2 2 0 00-2-2H9a2 2 0 00-2 2v.5H4.46L2.5 9.5 4 11.08V17h1a2 2 0 002 2h10a2 2 0 002-2h1v-5.92L19.5 9.5M9 6h6v.5H9V6m-.5 4h7v5h-7v-5z"/></svg>
+              <span class="text-xs font-bold text-slate-800 uppercase mt-1.5 text-center leading-tight">ENVÍO</span>
+            </div>
+            <div class="flex-1 min-w-0">
+            ${atrasado ? '<div class="mx-2 mt-2 rounded-xl bg-[#FFC107] border border-amber-600/30 flex items-center justify-center gap-1.5 py-2 px-3"><svg class="w-4 h-4 text-amber-700 shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg><span class="text-sm font-bold text-slate-900">Atrasado</span></div>' : ''}
+            ${pendienteTransferencia && !atrasado ? '<div class="mx-2 mt-2 rounded-xl bg-[#FFC107] border border-amber-600/30 flex items-center justify-center gap-1.5 py-2 px-3"><svg class="w-4 h-4 text-amber-700 shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg><span class="text-sm font-bold text-slate-900">Pendiente de transferencia</span></div>' : ''}
+            <div class="grid grid-cols-3 bg-[#FFC107] min-h-[3rem]">
+              <div class="flex items-center justify-center p-2 text-center">
+                <span class="text-slate-900 text-sm font-bold">${escapeHtml(envio.envio.sucursalEnvia)}</span>
+              </div>
+              <div class="flex flex-col items-center justify-center p-2 text-center">
+                <span class="block text-slate-900 text-xs leading-tight font-normal">${ddmm}</span>
+                <span class="block text-xs font-bold text-slate-900 leading-tight mt-0.5">${diaSemana}</span>
+                <span class="block text-xs font-bold text-slate-900 leading-tight mt-0.5">${horaRango}</span>
+              </div>
+              <div class="flex flex-col items-center justify-center p-2 text-center">
+                ${requiereTransferencia ? `<span class="inline-flex items-center gap-0.5 text-slate-900 text-xs font-medium leading-tight"><svg class="w-3.5 h-3.5 text-amber-700 shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92z" clip-rule="evenodd"/></svg> Requiere</span><span class="block text-slate-900 text-xs font-medium leading-tight mt-0.5">Transferencia</span>` : '<span class="text-slate-900 text-xs">—</span>'}
+              </div>
+            </div>
+            <div class="px-3 py-2.5 bg-slate-50">
+              <div class="flex items-center gap-1.5">
+                <i data-lucide="user" class="w-4 h-4 text-slate-900 shrink-0"></i>
+                <h3 class="font-bold text-slate-900 text-sm">${escapeHtml(envio.cliente.nombre)}</h3>
+              </div>
+              <div class="flex items-center gap-1.5 mt-1.5">
+                <i data-lucide="map-pin" class="w-4 h-4 text-slate-900 shrink-0"></i>
+                <p class="text-sm text-slate-900">${escapeHtml(envio.cliente.direccion || '-')}</p>
+              </div>
+              <div class="flex flex-wrap gap-2 mt-3 pt-2 border-t border-slate-200">
+                <button type="button" class="btn-card-eliminar inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium bg-slate-100 text-slate-900 active:scale-95 transition-transform">Eliminar</button>
+                <button type="button" class="btn-card-editar inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium bg-slate-100 text-slate-900 active:scale-95 transition-transform">Editar</button>
+                <button type="button" class="btn-card-ver inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium bg-app-bg text-white active:scale-95 transition-transform">Ver Envío</button>
+                ${estado === 'completo' ? `<button type="button" class="btn-card-reutilizar inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium bg-[#FFC107] text-slate-900 active:scale-95 transition-transform">Reutilizar</button>` : ''}
+              </div>
+            </div>
+            </div>
+          </article>
+        `;
+      }).join('');
+
+      container.querySelectorAll('.btn-card-eliminar').forEach(btn => {
+        btn.addEventListener('click', () => openModalConfirmDelete(btn.closest('[data-id]').dataset.id));
+      });
+      container.querySelectorAll('.btn-card-editar').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const card = btn.closest('[data-id]');
+          const item = getEnvios().find(e => e.id === card.dataset.id);
+          if (item) {
+            if (esTransferencia(item)) openModalFormTransferencia(item);
+            else openModalForm(item);
+          }
+        });
+      });
+      container.querySelectorAll('.btn-card-ver').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const card = btn.closest('[data-id]');
+          const item = getEnvios().find(e => e.id === card.dataset.id);
+          if (item) {
+            if (esTransferencia(item)) openModalVerTransferencia(item);
+            else openModalVer(item);
+          }
+        });
+      });
+      container.querySelectorAll('.btn-card-reutilizar').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const envio = getEnvios().find(e => e.id === btn.closest('[data-id]').dataset.id);
+          if (envio && !esTransferencia(envio)) openModalForm(envio, true);
+        });
+      });
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+      } catch (err) {
+        console.error('renderCards:', err);
+        const container = document.getElementById('cards-container');
+        const empty = document.getElementById('empty-state');
+        if (container) container.innerHTML = '';
+        if (empty) { empty.classList.remove('hidden'); empty.querySelector('h2').textContent = 'Error al cargar la lista'; }
+      }
+    }
+
+    let idToDelete = null;
+    function openModalConfirmDelete(id) {
+      idToDelete = id;
+      const modal = document.getElementById('modal-confirm-delete');
+      modal.classList.remove('hidden');
+      modal.setAttribute('aria-hidden', 'false');
+    }
+    function closeModalConfirmDelete() {
+      idToDelete = null;
+      document.getElementById('modal-confirm-delete').classList.add('hidden');
+      document.getElementById('modal-confirm-delete').setAttribute('aria-hidden', 'true');
+    }
+    function eliminar(id) {
+      openModalConfirmDelete(id);
+    }
+    function confirmarEliminar() {
+      if (idToDelete) {
+        setEnvios(getEnvios().filter(e => e.id !== idToDelete));
+        idToDelete = null;
+        closeModalConfirmDelete();
+        renderCards();
+      }
+    }
+
+    function toggleEntregado(id) {
+      const list = getEnvios();
+      const idx = list.findIndex(e => e.id === id);
+      if (idx === -1) return;
+      list[idx].entregado = !list[idx].entregado;
+      setEnvios(list);
+    }
+
+    function toggleTransferido(id) {
+      const list = getEnvios();
+      const idx = list.findIndex(e => e.id === id);
+      if (idx === -1) return;
+      list[idx].mercaderiaTransferida = !list[idx].mercaderiaTransferida;
+      setEnvios(list);
+    }
+
+    document.getElementById('form-envio').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const errorEl = document.getElementById('form-error');
+      const fecha = document.getElementById('fecha').value.trim();
+      const horaDesde = document.getElementById('horaDesde').value;
+      const horaHasta = document.getElementById('horaHasta').value;
+      const sucursalEnvia = document.getElementById('sucursalEnvia').value;
+      const sucursalFactura = document.getElementById('sucursalFactura').value;
+      const nombre = document.getElementById('nombre').value.trim();
+      const direccion = document.getElementById('direccion').value.trim();
+      const urlMapa = document.getElementById('urlMapa').value.trim();
+      const mensajes = [];
+      if (!fecha) mensajes.push('Fecha');
+      if (!horaDesde) mensajes.push('Hora desde');
+      if (!horaHasta) mensajes.push('Hora hasta');
+      if (!sucursalEnvia) mensajes.push('Sucursal que envía');
+      if (!sucursalFactura) mensajes.push('Sucursal que factura');
+      if (!nombre) mensajes.push('Nombre del cliente');
+      if (!direccion && !urlMapa) mensajes.push('Debe completar Dirección o Ubicación (URL del mapa)');
+      if (mensajes.length) {
+        errorEl.textContent = 'Complete los campos obligatorios: ' + mensajes.join(', ');
+        errorEl.classList.remove('hidden');
+        errorEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        return;
+      }
+      errorEl.classList.add('hidden');
+      errorEl.textContent = '';
+      const id = document.getElementById('envio-id').value;
+      // Si Sucursal Envía ≠ Sucursal Factura, el envío requiere transferencia de mercadería (automático)
+      const fileInput = document.getElementById('pdfFile');
+      let pdfBase64 = '';
+      let pdfNombre = '';
+      if (fileInput.files.length) {
+        const file = fileInput.files[0];
+        pdfNombre = file.name;
+        pdfBase64 = await fileToBase64(file);
+      } else if (id) {
+        const existing = getEnvios().find(e => e.id === id);
+        if (existing?.mercaderia?.pdfBase64) {
+          pdfBase64 = existing.mercaderia.pdfBase64;
+          pdfNombre = existing.mercaderia.pdfNombre || '';
+        }
+      }
+      const envio = {
+        id: id || 'id_' + Date.now(),
+        envio: {
+          fecha: document.getElementById('fecha').value,
+          horaDesde: document.getElementById('horaDesde').value,
+          horaHasta: document.getElementById('horaHasta').value,
+          sucursalEnvia,
+          sucursalFactura,
+        },
+        cliente: {
+          nombre: document.getElementById('nombre').value.trim(),
+          telefono: document.getElementById('telefono').value.trim(),
+          direccion: document.getElementById('direccion').value.trim(),
+          urlMapa: document.getElementById('urlMapa').value.trim(),
+          referencia: document.getElementById('referencia').value.trim(),
+        },
+        mercaderia: {
+          pdfBase64,
+          pdfNombre,
+          metodoPago: document.getElementById('metodoPago').value,
+        },
+        entregado: id ? (getEnvios().find(e => e.id === id)?.entregado ?? false) : false,
+        mercaderiaTransferida: id ? (getEnvios().find(e => e.id === id)?.mercaderiaTransferida ?? false) : false,
+        createdAt: id ? (getEnvios().find(e => e.id === id)?.createdAt ?? Date.now()) : Date.now(),
+      };
+      let list = getEnvios();
+      const i = list.findIndex(e => e.id === envio.id);
+      if (i >= 0) list[i] = envio;
+      else list.push(envio);
+      setEnvios(list);
+      closeModalForm();
+      renderCards();
+    });
+
+    function fileToBase64(file) {
+      return new Promise((resolve, reject) => {
+        const r = new FileReader();
+        r.onload = () => { resolve((r.result.split(',')[1]) || ''); };
+        r.onerror = reject;
+        r.readAsDataURL(file);
+      });
+    }
+
+    document.getElementById('form-transferencia').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const errorEl = document.getElementById('form-transferencia-error');
+      const fecha = (document.getElementById('transferencia-fecha') && document.getElementById('transferencia-fecha').value) ? document.getElementById('transferencia-fecha').value.trim() : '';
+      const sucursalDesde = document.getElementById('transferencia-desde').value;
+      const sucursalHasta = document.getElementById('transferencia-hasta').value;
+      const comentarios = document.getElementById('transferencia-comentarios').value.trim();
+      const fileInput = document.getElementById('transferencia-pdf');
+      const id = document.getElementById('transferencia-id').value;
+      const existing = id ? getEnvios().find(x => x.id === id && esTransferencia(x)) : null;
+      const tienePdf = fileInput.files.length > 0 || (existing && existing.pdfBase64);
+      const mensajes = [];
+      if (!fecha) mensajes.push('Fecha');
+      if (!sucursalDesde) mensajes.push('Sucursal Desde');
+      if (!sucursalHasta) mensajes.push('Sucursal Hasta');
+      if (sucursalDesde && sucursalHasta && sucursalDesde === sucursalHasta) mensajes.push('La sucursal de origen no puede ser igual a la de destino');
+      if (!comentarios && !tienePdf) mensajes.push('Debe ingresar Comentarios o cargar un PDF');
+      if (mensajes.length) {
+        errorEl.textContent = 'Complete los campos obligatorios: ' + mensajes.join('. ');
+        errorEl.classList.remove('hidden');
+        errorEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        return;
+      }
+      errorEl.classList.add('hidden');
+      errorEl.textContent = '';
+      let pdfBase64 = '';
+      let pdfNombre = '';
+      if (fileInput.files.length) {
+        const file = fileInput.files[0];
+        pdfNombre = file.name;
+        pdfBase64 = await fileToBase64(file);
+      } else if (existing) {
+        pdfBase64 = existing.pdfBase64 || '';
+        pdfNombre = existing.pdfNombre || '';
+      }
+      const transfer = {
+        id: id || 'id_transf_' + Date.now(),
+        tipo: 'transferencia',
+        fecha: fecha || (existing && existing.fecha) || new Date().toISOString().slice(0, 10),
+        sucursalDesde,
+        sucursalHasta,
+        comentarios: comentarios || (existing ? (existing.comentarios || existing.detalle || '') : ''),
+        pdfBase64,
+        pdfNombre,
+        createdAt: id && existing ? existing.createdAt : Date.now(),
+      };
+      let list = getEnvios();
+      const i = list.findIndex(e => e.id === transfer.id);
+      if (i >= 0) list[i] = transfer;
+      else list.push(transfer);
+      setEnvios(list);
+      closeModalFormTransferencia();
+      renderCards();
+    });
+
+    document.getElementById('btn-new').addEventListener('click', openModalSelectorTipo);
+    document.getElementById('btn-tipo-envio').addEventListener('click', () => { closeModalSelectorTipo(); openModalForm(); });
+    document.getElementById('btn-tipo-transferencia').addEventListener('click', () => { closeModalSelectorTipo(); openModalFormTransferencia(); });
+    document.getElementById('modal-selector-cerrar').addEventListener('click', closeModalSelectorTipo);
+    document.getElementById('modal-selector-tipo').addEventListener('click', (e) => { if (e.target.id === 'modal-selector-tipo') closeModalSelectorTipo(); });
+    document.getElementById('modal-transferencia-close').addEventListener('click', closeModalFormTransferencia);
+    document.getElementById('form-transferencia-cancel').addEventListener('click', closeModalFormTransferencia);
+    document.getElementById('modal-form-transferencia').addEventListener('click', (e) => { if (e.target.id === 'modal-form-transferencia') closeModalFormTransferencia(); });
+    document.getElementById('transferencia-pdf').addEventListener('change', function() {
+      document.getElementById('transferencia-pdf-filename').textContent = this.files.length ? this.files[0].name : 'Ninguno';
+    });
+    document.getElementById('filter-estado').addEventListener('change', renderCards);
+    document.getElementById('filter-sucursal').addEventListener('change', renderCards);
+    document.getElementById('filter-fecha').addEventListener('change', renderCards);
+    // Buscador en Completados: delegación para que funcione siempre al escribir/pegar
+    function onSearchInput() { renderCards(); }
+    document.addEventListener('input', function(e) {
+      if (e.target && e.target.id === 'search-cliente') onSearchInput();
+    });
+    document.addEventListener('keyup', function(e) {
+      if (e.target && e.target.id === 'search-cliente') onSearchInput();
+    });
+    document.addEventListener('paste', function(e) {
+      if (e.target && e.target.id === 'search-cliente') setTimeout(onSearchInput, 0);
+    });
+    document.getElementById('link-historial').addEventListener('click', (e) => {
+      e.preventDefault();
+      const action = e.currentTarget.dataset.action;
+      const filterEstado = document.getElementById('filter-estado');
+      if (action === 'historial') filterEstado.value = 'completo';
+      else if (action === 'pendientes') filterEstado.value = 'pendientes';
+      renderCards();
+    });
+    document.getElementById('modal-close').addEventListener('click', closeModalForm);
+    document.getElementById('form-cancel').addEventListener('click', closeModalForm);
+    document.getElementById('modal-form').addEventListener('click', (e) => { if (e.target.id === 'modal-form') closeModalForm(); });
+    document.getElementById('modal-ver-close').addEventListener('click', closeModalVer);
+    document.getElementById('modal-ver').addEventListener('click', (e) => { if (e.target.id === 'modal-ver') closeModalVer(); });
+    document.getElementById('modal-delete-cancel').addEventListener('click', closeModalConfirmDelete);
+    document.getElementById('modal-delete-confirm').addEventListener('click', confirmarEliminar);
+    document.getElementById('modal-confirm-delete').addEventListener('click', (e) => { if (e.target.id === 'modal-confirm-delete') closeModalConfirmDelete(); });
+
+    fillHoras();
+    renderCards();
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+  </script>
+</body>
+</html>
