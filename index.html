@@ -33,10 +33,20 @@
     .dropdown-arrow { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2364748B'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E"); background-size: 1.25rem; background-position: right 0.75rem center; background-repeat: no-repeat; }
     input[type="file"] { position: absolute; opacity: 0; width: 0; height: 0; }
     .card-tab-icon { filter: brightness(0) saturate(100%); }
-    .card-fixed { height: 272px; overflow: hidden; }
-    .card-content-wrap { min-height: 0; overflow: hidden; display: flex; flex-direction: column; }
-    .card-content-wrap .card-body { flex: 1; min-height: 0; overflow: hidden; }
-    .card-content-wrap .card-body .truncate-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    /* Tarjeta: grid sin wrapper. Sidebar + 3 filas (cabecera | datos | botones). Misma estructura en envío y transferencia */
+    .card-fixed { min-height: 156px; overflow: hidden; display: grid; grid-template-columns: auto 1fr; grid-template-rows: 1fr 1fr 1fr; }
+    .card-fixed .card-sidebar { grid-row: 1 / -1; }
+    .card-fixed .card-row-header { min-height: 0; display: grid; align-items: center; }
+    .card-fixed .card-row-body { min-height: 0; overflow: hidden; display: flex; flex-direction: column; justify-content: center; padding: 0.375rem 0.75rem; }
+    .card-fixed .card-row-body .truncate-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    .card-fixed .card-row-actions { height: 48px; min-height: 48px; max-height: 48px; display: flex; align-items: center; flex-wrap: wrap; gap: 0.5rem; padding: 0 0.75rem; border-top: 1px solid #e2e8f0; background: #f8fafc; overflow: hidden; }
+    .card-sidebar { background-color: #338EC9 !important; border-color: rgba(0,0,0,0.08) !important; color: #fff; }
+    .card-sidebar.card-sidebar-atrasado { background-color: #b91c1c !important; }
+    .card-sidebar span { color: #fff !important; }
+    .card-sidebar svg { color: #fff !important; }
+    .card-sidebar .envio-icon-img { filter: brightness(0) invert(1); }
+    .card-badge-atrasado { padding: 0.25rem 0.5rem; border-radius: 0.375rem; background-color: #b91c1c; color: #fff; font-size: 0.625rem; font-weight: 700; letter-spacing: 0.05em; }
+    .dashboard-btn-active { border-color: rgba(255,255,255,0.9); box-shadow: 0 0 0 2px rgba(255,255,255,0.5); }
   </style>
 </head>
 <body class="bg-app-bg min-h-screen text-slate-900 safe-bottom">
@@ -44,27 +54,35 @@
     <!-- Contenedor centrado: 95% móvil, 50% escritorio -->
     <div class="w-[95%] md:w-1/2 mx-auto min-h-full">
       <header class="pt-4 pb-2">
-        <img src="encabezado.png" alt="Envíos &amp; Transferencias - TiendaColor Pinturerías" class="w-full h-auto object-contain rounded-lg" />
+        <img src="encabeazdo.png" alt="Envíos &amp; Transferencias - TiendaColor Pinturerías" class="w-full h-auto object-contain rounded-lg" />
       </header>
 
       <!-- Filtros (compactos) -->
       <section class="pt-1 pb-2">
-        <div class="bg-white/10 backdrop-blur rounded-xl shadow-sm p-2 space-y-2">
+        <div class="rounded-xl shadow-sm p-2 space-y-2" style="background-color: #338EC9;">
           <div>
-            <label for="filter-estado" class="block text-xs font-medium text-white/90 uppercase tracking-wide mb-0.5">Estado</label>
-            <select id="filter-estado" class="w-full rounded-lg bg-white px-2.5 py-2 text-sm text-slate-900 dropdown-arrow appearance-none pr-9 border-0 shadow-sm">
-              <option value="pendientes" selected>Pendientes</option>
-              <option value="completo">Completados</option>
-              <option value="todo">Todo</option>
+            <label for="filter-tipo" class="block text-xs font-medium text-white/90 uppercase tracking-wide mb-0.5">Tipo</label>
+            <select id="filter-tipo" class="w-full rounded-lg bg-white px-2.5 py-2 text-sm text-slate-900 dropdown-arrow appearance-none pr-9 border-0 shadow-sm">
+              <option value="todo" selected>Todo</option>
+              <option value="envio">Envío</option>
+              <option value="transferencia">Transferencia</option>
             </select>
           </div>
-          <div class="grid grid-cols-2 gap-2">
+          <div class="grid grid-cols-3 gap-2">
             <div>
               <label for="filter-sucursal" class="block text-xs font-medium text-white/90 uppercase tracking-wide mb-0.5">Sucursal</label>
               <select id="filter-sucursal" class="w-full rounded-lg bg-white px-2.5 py-2 text-sm text-slate-900 dropdown-arrow appearance-none pr-9 border-0 shadow-sm">
-                <option value="todo">Todo</option>
+                <option value="todo" selected>Todo</option>
                 <option value="Guaymallén">Guaymallén</option>
                 <option value="Maipú">Maipú</option>
+              </select>
+            </div>
+            <div>
+              <label for="filter-estado" class="block text-xs font-medium text-white/90 uppercase tracking-wide mb-0.5">Estado</label>
+              <select id="filter-estado" class="w-full rounded-lg bg-white px-2.5 py-2 text-sm text-slate-900 dropdown-arrow appearance-none pr-9 border-0 shadow-sm">
+                <option value="pendientes" selected>Pendientes</option>
+                <option value="completo">Completados</option>
+                <option value="todo">Todo</option>
               </select>
             </div>
             <div>
@@ -86,21 +104,21 @@
         </div>
       </section>
 
-      <!-- Indicadores del dashboard (según filtros activos) -->
-      <section id="resumen-section" class="pt-2 pb-2">
+      <!-- Indicadores del dashboard: botones que aplican filtros (fijo al hacer scroll) -->
+      <section id="resumen-section" class="pt-2 pb-2 sticky top-0 z-20" style="background-color: #0072BB;" data-dashboard-filter="todos">
         <div class="grid grid-cols-3 gap-2">
-          <div class="bg-white/20 backdrop-blur rounded-lg px-2 py-2 text-center">
+          <button type="button" id="btn-dash-pendientes" class="dashboard-btn rounded-lg px-2 py-2 text-center cursor-pointer border-2 border-transparent transition-all active:scale-95 focus:outline-none focus:ring-2 focus:ring-white/80" style="background-color: #338EC9;" data-dashboard-filter="todos" aria-pressed="true">
             <p class="text-[10px] font-medium text-white/90 uppercase">Pendientes</p>
             <p id="ind-pendientes" class="text-lg font-bold text-white">0</p>
-          </div>
-          <div id="ind-atrasados-wrap" class="bg-white/20 backdrop-blur rounded-lg px-2 py-2 text-center">
+          </button>
+          <button type="button" id="btn-dash-atrasados" class="dashboard-btn rounded-lg px-2 py-2 text-center cursor-pointer border-2 border-transparent transition-all active:scale-95 focus:outline-none focus:ring-2 focus:ring-white/80" style="background-color: #338EC9;" data-dashboard-filter="atrasados" aria-pressed="false">
             <p class="text-[10px] font-medium text-white/90 uppercase">Atrasados</p>
             <p id="ind-atrasados" class="text-lg font-bold text-white">0</p>
-          </div>
-          <div class="bg-white/20 backdrop-blur rounded-lg px-2 py-2 text-center">
+          </button>
+          <button type="button" id="btn-dash-transf" class="dashboard-btn rounded-lg px-2 py-2 text-center cursor-pointer border-2 border-transparent transition-all active:scale-95 focus:outline-none focus:ring-2 focus:ring-white/80" style="background-color: #338EC9;" data-dashboard-filter="transf-pend" aria-pressed="false">
             <p class="text-[10px] font-medium text-white/90 uppercase">Transf. Pend.</p>
             <p id="ind-transferencias" class="text-lg font-bold text-white">0</p>
-          </div>
+          </button>
         </div>
         <div class="h-0.5 w-full bg-[#FFC107] mt-2" aria-hidden="true"></div>
       </section>
@@ -180,6 +198,7 @@
                   </select>
                 </div>
               </div>
+              <p id="transferencia-sucursales-error" class="hidden text-red-600 text-xs font-medium mt-1" role="alert">Las sucursales Origen y Destino deben ser diferentes.</p>
             </section>
             <section class="rounded-lg border border-[#FFC107] bg-white p-2.5 space-y-2">
               <h3 class="text-[10px] font-bold text-slate-900 uppercase tracking-wide flex items-center gap-1"><i data-lucide="message-square" class="w-3.5 h-3.5 text-[#0072BB]"></i> Comentarios</h3>
@@ -403,15 +422,18 @@
 
     function getFilteredEnvios() {
       const estado = document.getElementById('filter-estado').value;
+      const tipo = document.getElementById('filter-tipo').value;
       const sucursal = document.getElementById('filter-sucursal').value;
       const fecha = document.getElementById('filter-fecha').value;
       const hoy = new Date().toISOString().slice(0, 10);
       let list = getEnvios();
       if (estado === 'pendientes') list = list.filter(item => esTransferencia(item) || visibleEnVistaPrincipal(item));
       else if (estado === 'completo') list = list.filter(item => esTransferencia(item) || esCompleto(item));
+      if (tipo === 'envio') list = list.filter(item => !esTransferencia(item));
+      else if (tipo === 'transferencia') list = list.filter(item => esTransferencia(item));
       if (sucursal !== 'todo') {
         list = list.filter(item => {
-          if (esTransferencia(item)) return item.sucursalDesde === sucursal || item.sucursalHasta === sucursal;
+          if (esTransferencia(item)) return item.sucursalDesde === sucursal;
           return item.envio && item.envio.sucursalEnvia === sucursal;
         });
       }
@@ -541,11 +563,27 @@
       }
       modal.classList.remove('hidden');
       modal.setAttribute('aria-hidden', 'false');
+      validateTransferenciaSucursales();
       if (typeof lucide !== 'undefined') lucide.createIcons();
     }
     function closeModalFormTransferencia() {
       document.getElementById('modal-form-transferencia').classList.add('hidden');
       document.getElementById('modal-form-transferencia').setAttribute('aria-hidden', 'true');
+    }
+
+    function validateTransferenciaSucursales() {
+      const desde = document.getElementById('transferencia-desde');
+      const hasta = document.getElementById('transferencia-hasta');
+      const errorEl = document.getElementById('transferencia-sucursales-error');
+      const submitBtn = document.getElementById('form-transferencia-submit');
+      if (!desde || !hasta || !errorEl || !submitBtn) return;
+      const same = desde.value && hasta.value && desde.value === hasta.value;
+      errorEl.classList.toggle('hidden', !same);
+      desde.classList.toggle('border-red-500', same);
+      desde.classList.toggle('border-slate-300', !same);
+      hasta.classList.toggle('border-red-500', same);
+      hasta.classList.toggle('border-slate-300', !same);
+      submitBtn.disabled = same;
     }
 
     function openModalVer(envio) {
@@ -650,7 +688,17 @@
           w.document.close();
         });
       }
-      actions.innerHTML = '';
+      const transferidaDone = !!transfer.completada;
+      actions.innerHTML = `
+        <button type="button" id="modal-btn-transferencia-transferida" class="w-full py-4 rounded-xl font-bold text-base active:scale-95 transition-transform min-h-[48px] ${transferidaDone ? 'bg-slate-200 text-slate-500' : 'text-white bg-[#0072BB]'}">
+          ${transferidaDone ? '<span class="inline-flex items-center gap-2"><i data-lucide="check" class="w-5 h-5 text-[#0072BB]"></i> Transferida</span>' : 'Transferida'}
+        </button>
+      `;
+      actions.querySelector('#modal-btn-transferencia-transferida').addEventListener('click', () => {
+        toggleTransferenciaCompletada(transfer.id);
+        closeModalVer();
+        renderCards();
+      });
       if (typeof lucide !== 'undefined') lucide.createIcons();
       modal.classList.remove('hidden');
       modal.setAttribute('aria-hidden', 'false');
@@ -702,15 +750,7 @@
       document.getElementById('ind-pendientes').textContent = pendientes;
       document.getElementById('ind-atrasados').textContent = atrasados;
       document.getElementById('ind-transferencias').textContent = transferencias;
-      const wrap = document.getElementById('ind-atrasados-wrap');
-      if (atrasados > 0) {
-        wrap.classList.remove('bg-white/20');
-        wrap.classList.add('bg-red-500/90');
-      } else {
-        wrap.classList.add('bg-white/20');
-        wrap.classList.remove('bg-red-500/90');
       }
-    }
 
     function updateEmptyStateContent() {
       const empty = document.getElementById('empty-state');
@@ -751,6 +791,15 @@
         if (esTransferencia(item)) return true;
         return item && item.envio && item.cliente;
       });
+      const resumenSection = document.getElementById('resumen-section');
+      const dashFilter = (resumenSection && resumenSection.dataset.dashboardFilter) || 'todos';
+      if (dashFilter === 'atrasados') envios = envios.filter(e => esTransferencia(e) ? isAtrasadoTransfer(e) : (e.envio && isAtrasado(e)));
+      if (dashFilter === 'transf-pend') envios = envios.filter(e => !esTransferencia(e) && e.envio && e.envio.sucursalEnvia !== e.envio.sucursalFactura && !e.mercaderiaTransferida);
+      document.querySelectorAll('.dashboard-btn').forEach(btn => {
+        const isActive = btn.dataset.dashboardFilter === dashFilter;
+        btn.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+        btn.classList.toggle('dashboard-btn-active', isActive);
+      });
       const searchEl = document.getElementById('search-cliente');
       const searchTerm = (searchEl && searchEl.value) ? String(searchEl.value).trim().toLowerCase() : '';
       if (estado === 'completo' && searchTerm) {
@@ -784,42 +833,40 @@
           const textoDetalle = (item.comentarios || item.detalle || '-').toString();
           const desde = (item.sucursalDesde || '').toString();
           const hasta = (item.sucursalHasta || '').toString();
-          const rutaCol3 = escapeHtml(desde) + ' → ' + escapeHtml(hasta);
           const atrasadoTransf = isAtrasadoTransfer(item);
           const fechaTransf = (item.fecha || '').toString();
           const fechaConDiaTransf = fechaTransf ? formatFechaConDia(fechaTransf) : '—';
           const [diaSemanaTransf, ...restoFechaTransf] = fechaConDiaTransf.split(', ');
           const ddmmTransf = restoFechaTransf.length ? restoFechaTransf.join(', ').split('/').slice(0, 2).join('/') : '—';
           return `
-          <article class="card-fixed bg-slate-50 rounded-2xl border-2 border-[#FFC107] overflow-hidden animate-in text-slate-900 shadow-md flex" data-id="${escapeHtml(item.id)}" data-tipo="transferencia">
-            <div class="w-12 min-w-[3rem] flex-shrink-0 bg-sky-50 flex flex-col items-center justify-center py-3 px-1 border-r-2 border-sky-100">
+          <article class="card-fixed bg-slate-50 rounded-2xl border-2 border-[#FFC107] overflow-hidden animate-in text-slate-900 shadow-md" data-id="${escapeHtml(item.id)}" data-tipo="transferencia">
+            <div class="card-sidebar w-12 min-w-[3rem] flex-shrink-0 flex flex-col items-center justify-center py-3 px-1 border-r-2 ${atrasadoTransf ? 'card-sidebar-atrasado' : ''}">
               <svg class="w-6 h-6 text-slate-900 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/></svg>
               <span class="text-xs font-bold text-slate-900 uppercase mt-1.5 text-center leading-tight">TRANSF.</span>
             </div>
-            <div class="flex-1 min-w-0 flex flex-col card-content-wrap">
-              <div class="grid grid-cols-3 bg-[#FFC107] min-h-[3rem] relative flex-shrink-0">
-                ${atrasadoTransf ? '<span class="absolute top-1 right-1 rounded-md bg-amber-700 text-white text-[10px] font-bold px-1.5 py-0.5">Atrasado</span>' : ''}
-                <div class="flex items-center justify-center p-2 text-center"><span class="text-slate-900 text-sm font-bold truncate">${escapeHtml(desde)}</span></div>
-                <div class="flex flex-col items-center justify-center p-2 text-center">
+              <div class="card-row-header grid grid-cols-3 bg-[#FFC107] relative">
+                <div class="flex items-center justify-center p-1.5 text-center"><span class="text-slate-900 text-sm font-bold truncate">${escapeHtml(desde)}</span></div>
+                <div class="flex flex-col items-center justify-center p-1.5 text-center">
                   <span class="block text-slate-900 text-xs leading-tight font-normal">${escapeHtml(ddmmTransf)}</span>
                   <span class="block text-slate-900 text-xs font-bold leading-tight mt-0.5">${escapeHtml(fechaTransf ? diaSemanaTransf : '—')}</span>
                 </div>
-                <div class="flex flex-col items-center justify-center p-2 text-center min-w-0">
-                  <span class="block text-slate-900 text-xs font-medium leading-tight truncate">${rutaCol3}</span>
+                <div class="flex flex-col items-center justify-center p-1.5 text-center min-w-0">
+                  <span class="block text-slate-900 text-[10px] font-bold uppercase tracking-wide mb-0.5">Mercadería</span>
+                  <span class="inline-flex items-center gap-1 flex-wrap justify-center"><span class="px-1.5 py-0.5 rounded bg-slate-200 text-slate-900 text-xs font-medium truncate max-w-[4.5rem]">${escapeHtml(desde)}</span><span class="text-slate-700 shrink-0">→</span><span class="px-1.5 py-0.5 rounded bg-slate-200 text-slate-900 text-xs font-medium truncate max-w-[4.5rem]">${escapeHtml(hasta)}</span></span>
                 </div>
               </div>
-              <div class="px-3 py-2.5 bg-slate-50 card-body flex-shrink-0">
+              <div class="card-row-body bg-slate-50">
                 <div class="flex items-center gap-2 min-w-0">
                   <svg class="w-4 h-4 text-slate-900 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
                   <h3 class="font-bold text-slate-900 text-sm truncate">${escapeHtml(textoDetalle)}</h3>
                 </div>
-                <div class="flex flex-wrap gap-2 mt-3 pt-2 border-t border-slate-200">
-                  <button type="button" class="btn-card-eliminar inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium bg-slate-100 text-slate-900 active:scale-95 transition-transform">Eliminar</button>
-                  <button type="button" class="btn-card-editar inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium bg-slate-100 text-slate-900 active:scale-95 transition-transform">Editar</button>
-                  <button type="button" class="btn-card-ver inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium bg-app-bg text-white active:scale-95 transition-transform">Ver Transferencia</button>
-                </div>
               </div>
-            </div>
+              <div class="card-row-actions">
+                ${atrasadoTransf ? '<span class="card-badge-atrasado shrink-0">ATRASADO</span>' : ''}
+                <button type="button" class="btn-card-eliminar inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium bg-slate-100 text-slate-900 active:scale-95 transition-transform">Eliminar</button>
+                <button type="button" class="btn-card-editar inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium bg-slate-100 text-slate-900 active:scale-95 transition-transform">Editar</button>
+                <button type="button" class="btn-card-ver inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium text-white active:scale-95 transition-transform" style="background-color: #338EC9;">Ver Transferencia</button>
+              </div>
           </article>
         `;
         }
@@ -832,45 +879,44 @@
         const fechaSolo = restoFecha.join(', ');
         const ddmm = fechaSolo.split('/').slice(0, 2).join('/');
         const horaRango = `${envio.envio.horaDesde} - ${envio.envio.horaHasta}`;
-        const alertBadge = atrasado ? 'Atrasado' : (pendienteTransferencia ? 'Pend. transf.' : '');
+        const alertBadge = atrasado ? '' : (pendienteTransferencia ? 'Pend. transf.' : '');
         return `
-          <article class="card-fixed bg-slate-50 rounded-2xl border-2 border-[#FFC107] overflow-hidden animate-in text-slate-900 shadow-md flex" data-id="${escapeHtml(envio.id)}" data-tipo="envio">
-            <div class="w-12 min-w-[3rem] flex-shrink-0 bg-sky-50 flex flex-col items-center justify-center py-3 px-1 border-r-2 border-sky-100">
-              <img src="icono_camioneta.png" alt="" class="w-6 h-6 object-contain shrink-0 envio-icon-img card-tab-icon" onerror="this.style.display='none';var s=this.nextElementSibling;if(s)s.style.display='block';" />
-              <svg class="w-6 h-6 text-slate-900 shrink-0 hidden envio-icon-fallback" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 18.5a1.5 1.5 0 01-1.5-1.5 1.5 1.5 0 011.5-1.5 1.5 1.5 0 011.5 1.5 1.5 1.5 0 01-1.5 1.5m1.5-9l-1.96-2.5H17V6a2 2 0 00-2-2H9a2 2 0 00-2 2v.5H4.46L2.5 9.5 4 11.08V17h1a2 2 0 002 2h10a2 2 0 002-2h1v-5.92L19.5 9.5M9 6h6v.5H9V6m-.5 4h7v5h-7v-5z"/></svg>
+          <article class="card-fixed bg-slate-50 rounded-2xl border-2 border-[#FFC107] overflow-hidden animate-in text-slate-900 shadow-md" data-id="${escapeHtml(envio.id)}" data-tipo="envio">
+            <div class="card-sidebar w-12 min-w-[3rem] flex-shrink-0 flex flex-col items-center justify-center py-3 px-1 border-r-2 ${atrasado ? 'card-sidebar-atrasado' : ''}">
+              <img src="icono_camioneta.png" alt="" class="w-6 h-6 object-contain shrink-0 envio-icon-img card-tab-icon" onerror="this.style.display='none';var s=this.nextElementSibling;if(s)s.style.display='block';" /><i data-lucide="truck" class="hidden envio-icon-fallback w-6 h-6 shrink-0"></i>
               <span class="text-xs font-bold text-slate-900 uppercase mt-1.5 text-center leading-tight">ENVÍO</span>
             </div>
-            <div class="flex-1 min-w-0 flex flex-col card-content-wrap">
-            <div class="grid grid-cols-3 bg-[#FFC107] min-h-[3rem] relative flex-shrink-0">
+            <div class="card-row-header grid grid-cols-3 bg-[#FFC107] relative">
               ${alertBadge ? `<span class="absolute top-1 right-1 rounded-md bg-amber-700 text-white text-[10px] font-bold px-1.5 py-0.5">${escapeHtml(alertBadge)}</span>` : ''}
-              <div class="flex items-center justify-center p-2 text-center">
+              <div class="flex items-center justify-center p-1.5 text-center">
                 <span class="text-slate-900 text-sm font-bold truncate">${escapeHtml(envio.envio.sucursalEnvia)}</span>
               </div>
-              <div class="flex flex-col items-center justify-center p-2 text-center">
+              <div class="flex flex-col items-center justify-center p-1.5 text-center">
                 <span class="block text-slate-900 text-xs leading-tight font-normal">${ddmm}</span>
                 <span class="block text-xs font-bold text-slate-900 leading-tight mt-0.5">${diaSemana}</span>
                 <span class="block text-xs font-bold text-slate-900 leading-tight mt-0.5 truncate">${horaRango}</span>
               </div>
-              <div class="flex flex-col items-center justify-center p-2 text-center min-w-0">
-                ${requiereTransferencia ? `<span class="inline-flex items-center gap-0.5 text-slate-900 text-xs font-medium leading-tight"><svg class="w-3.5 h-3.5 text-amber-700 shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92z" clip-rule="evenodd"/></svg> Requiere</span><span class="block text-slate-900 text-xs font-medium leading-tight mt-0.5 truncate">Transferencia</span>` : '<span class="text-slate-900 text-xs">—</span>'}
+              <div class="flex flex-col items-center justify-center p-1.5 text-center min-w-0">
+                <span class="block text-slate-900 text-[10px] font-bold uppercase tracking-wide mb-0.5">Mercadería</span>
+                ${requiereTransferencia ? `<span class="inline-flex items-center gap-1 flex-wrap justify-center"><span class="px-1.5 py-0.5 rounded bg-slate-200 text-slate-900 text-xs font-medium truncate max-w-[4.5rem]">${escapeHtml(envio.envio.sucursalEnvia)}</span><span class="text-slate-700 shrink-0">→</span><span class="px-1.5 py-0.5 rounded bg-slate-200 text-slate-900 text-xs font-medium truncate max-w-[4.5rem]">${escapeHtml(envio.envio.sucursalFactura)}</span></span>` : '<span class="text-slate-900 text-xs">—</span>'}
               </div>
             </div>
-            <div class="px-3 py-2.5 bg-slate-50 card-body flex-shrink-0">
+            <div class="card-row-body bg-slate-50">
               <div class="flex items-center gap-1.5 min-w-0">
                 <i data-lucide="user" class="w-4 h-4 text-slate-900 shrink-0"></i>
                 <h3 class="font-bold text-slate-900 text-sm truncate">${escapeHtml(envio.cliente.nombre)}</h3>
               </div>
-              <div class="flex items-center gap-1.5 mt-1.5 min-w-0">
+              <div class="flex items-center gap-1.5 mt-1 min-w-0">
                 <i data-lucide="map-pin" class="w-4 h-4 text-slate-900 shrink-0"></i>
                 <p class="text-sm text-slate-900 truncate">${escapeHtml(envio.cliente.direccion || '-')}</p>
               </div>
-              <div class="flex flex-wrap gap-2 mt-3 pt-2 border-t border-slate-200">
-                <button type="button" class="btn-card-eliminar inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium bg-slate-100 text-slate-900 active:scale-95 transition-transform">Eliminar</button>
-                <button type="button" class="btn-card-editar inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium bg-slate-100 text-slate-900 active:scale-95 transition-transform">Editar</button>
-                <button type="button" class="btn-card-ver inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium bg-app-bg text-white active:scale-95 transition-transform">Ver Envío</button>
-                ${estado === 'completo' ? `<button type="button" class="btn-card-reutilizar inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium bg-[#FFC107] text-slate-900 active:scale-95 transition-transform">Reutilizar</button>` : ''}
-              </div>
             </div>
+            <div class="card-row-actions">
+              ${atrasado ? '<span class="card-badge-atrasado shrink-0">ATRASADO</span>' : ''}
+              <button type="button" class="btn-card-eliminar inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium bg-slate-100 text-slate-900 active:scale-95 transition-transform">Eliminar</button>
+              <button type="button" class="btn-card-editar inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium bg-slate-100 text-slate-900 active:scale-95 transition-transform">Editar</button>
+              <button type="button" class="btn-card-ver inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium text-white active:scale-95 transition-transform" style="background-color: #338EC9;">Ver Envío</button>
+              ${estado === 'completo' ? `<button type="button" class="btn-card-reutilizar inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium bg-[#FFC107] text-slate-900 active:scale-95 transition-transform">Reutilizar</button>` : ''}
             </div>
           </article>
         `;
@@ -952,6 +998,14 @@
       const idx = list.findIndex(e => e.id === id);
       if (idx === -1) return;
       list[idx].mercaderiaTransferida = !list[idx].mercaderiaTransferida;
+      setEnvios(list);
+    }
+
+    function toggleTransferenciaCompletada(id) {
+      const list = getEnvios();
+      const idx = list.findIndex(e => e.id === id && esTransferencia(e));
+      if (idx === -1) return;
+      list[idx].completada = !list[idx].completada;
       setEnvios(list);
     }
 
@@ -1056,7 +1110,7 @@
       if (!fecha) mensajes.push('Fecha');
       if (!sucursalDesde) mensajes.push('Sucursal Desde');
       if (!sucursalHasta) mensajes.push('Sucursal Hasta');
-      if (sucursalDesde && sucursalHasta && sucursalDesde === sucursalHasta) mensajes.push('La sucursal de origen no puede ser igual a la de destino');
+      if (sucursalDesde && sucursalHasta && sucursalDesde === sucursalHasta) mensajes.push('Las sucursales Origen y Destino deben ser diferentes');
       if (!comentarios && !tienePdf) mensajes.push('Debe ingresar Comentarios o cargar un PDF');
       if (mensajes.length) {
         errorEl.textContent = 'Complete los campos obligatorios: ' + mensajes.join('. ');
@@ -1107,9 +1161,26 @@
     document.getElementById('transferencia-pdf').addEventListener('change', function() {
       document.getElementById('transferencia-pdf-filename').textContent = this.files.length ? this.files[0].name : 'Ninguno';
     });
-    document.getElementById('filter-estado').addEventListener('change', renderCards);
-    document.getElementById('filter-sucursal').addEventListener('change', renderCards);
-    document.getElementById('filter-fecha').addEventListener('change', renderCards);
+    document.getElementById('transferencia-desde').addEventListener('change', validateTransferenciaSucursales);
+    document.getElementById('transferencia-hasta').addEventListener('change', validateTransferenciaSucursales);
+    function resetDashboardFilter() {
+      const section = document.getElementById('resumen-section');
+      if (section) section.dataset.dashboardFilter = 'todos';
+    }
+    document.getElementById('filter-estado').addEventListener('change', () => { resetDashboardFilter(); renderCards(); });
+    document.getElementById('filter-tipo').addEventListener('change', () => { resetDashboardFilter(); renderCards(); });
+    document.getElementById('filter-sucursal').addEventListener('change', () => { resetDashboardFilter(); renderCards(); });
+    document.getElementById('filter-fecha').addEventListener('change', () => { resetDashboardFilter(); renderCards(); });
+    document.querySelectorAll('.dashboard-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const section = document.getElementById('resumen-section');
+        if (section && btn.dataset.dashboardFilter) {
+          section.dataset.dashboardFilter = btn.dataset.dashboardFilter;
+          document.getElementById('filter-estado').value = 'pendientes';
+          renderCards();
+        }
+      });
+    });
     // Buscador en Completados: delegación para que funcione siempre al escribir/pegar
     function onSearchInput() { renderCards(); }
     document.addEventListener('input', function(e) {
