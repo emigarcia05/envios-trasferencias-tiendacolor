@@ -4,17 +4,14 @@ import type { Item } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
 
-/** GET: listar todos los ítems (envíos + transferencias) */
+/** GET: listar todos los ítems (envíos + transferencias). Si Neo4j no está disponible, devuelve [] para que la app cargue. */
 export async function GET() {
   try {
     const items = await getAllItems();
     return NextResponse.json(items);
   } catch (e) {
-    console.error("GET /api/envios", e);
-    return NextResponse.json(
-      { error: "Error al obtener la lista" },
-      { status: 500 }
-    );
+    console.error("GET /api/envios (Neo4j no disponible?):", e);
+    return NextResponse.json([]);
   }
 }
 

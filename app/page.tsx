@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect, useCallback, useMemo } from "react";
-import Image from "next/image";
 import {
   Truck,
   ArrowLeftRight,
@@ -200,7 +199,8 @@ export default function Home() {
     <div className="bg-app-bg min-h-screen text-slate-900 safe-bottom pb-24">
       <div className="w-[95%] md:w-1/2 mx-auto min-h-full">
         <header className="pt-4 pb-2">
-          <Image src="/encabeazdo.png" alt="Envíos & Transferencias - TiendaColor Pinturerías" width={600} height={120} className="w-full h-auto object-contain rounded-lg" />
+          {/* Imagen en public/encabeazdo.png (copiar desde la raíz del proyecto si no existe) */}
+          <img src="/encabeazdo.png" alt="Envíos & Transferencias - TiendaColor Pinturerías" className="w-full h-auto object-contain rounded-lg" />
         </header>
 
         <section className="pt-1 pb-2">
