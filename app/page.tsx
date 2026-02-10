@@ -277,6 +277,24 @@ export default function Home() {
     setModalVer(true);
   };
 
+  const markEntregado = async (ev: ItemEnvio) => {
+    const updated = { ...ev, entregado: true };
+    const ok = await saveItem(updated);
+    if (ok) {
+      await fetchItems();
+      setVerItem(updated);
+    }
+  };
+
+  const markMercaderiaTransferida = async (ev: ItemEnvio) => {
+    const updated = { ...ev, mercaderiaTransferida: true };
+    const ok = await saveItem(updated);
+    if (ok) {
+      await fetchItems();
+      setVerItem(updated);
+    }
+  };
+
   const confirmDelete = async () => {
     if (idToDelete) {
       await deleteItemById(idToDelete);
@@ -378,7 +396,6 @@ export default function Home() {
                 <select id="filter-estado" value={filterEstado} onChange={(e) => { setFilterEstado(e.target.value); setDashboardFilter("todos"); }} className="w-full rounded-lg bg-white px-2.5 py-2 text-sm text-slate-900 dropdown-arrow appearance-none pr-9 border-0 shadow-sm">
                   <option value="pendientes">Pendientes</option>
                   <option value="completo">Completados</option>
-                  <option value="todo">Todo</option>
                 </select>
               </div>
               <div>
@@ -705,19 +722,52 @@ export default function Home() {
               ) : (
                 (() => {
                   const ev = verItem as ItemEnvio;
+                  const requiereTransferencia = ev.envio && ev.envio.sucursalEnvia !== ev.envio.sucursalFactura;
                   return (
                     <>
                       <p className="text-sm flex items-center gap-2"><User className="w-4 h-4 text-[#0072BB]" /><span className="font-bold">Nombre:</span> {ev.cliente?.nombre}</p>
                       <p className="text-sm flex items-center gap-2"><MapPin className="w-4 h-4 text-[#0072BB]" /><span className="font-bold">Dirección:</span> {ev.cliente?.direccion || "-"}</p>
                       <p className="text-sm flex items-center gap-2"><Calendar className="w-4 h-4 text-[#0072BB]" /><span className="font-bold">Fecha:</span> {ev.envio?.fecha ? formatDDMMYYYY(ev.envio.fecha) : "-"}</p>
                       <p className="text-sm flex items-center gap-2"><Clock className="w-4 h-4 text-[#0072BB]" /><span className="font-bold">Horario:</span> {ev.envio?.horaDesde} - {ev.envio?.horaHasta}</p>
-                      <p className="text-sm flex items-center gap-2"><Store className="w-4 h-4 text-[#0072BB]" /><span className="font-bold">Sucursal:</span> {ev.envio?.sucursalEnvia}{ev.envio?.sucursalEnvia !== ev.envio?.sucursalFactura ? ` (Factura: ${ev.envio?.sucursalFactura})` : ""}</p>
+                      <p className="text-sm flex items-center gap-2"><Store className="w-4 h-4 text-[#0072BB]" /><span className="font-bold">Sucursal:</span> {ev.envio?.sucursalEnvia}{requiereTransferencia ? ` (Factura: ${ev.envio?.sucursalFactura})` : ""}</p>
+                      {(ev.cliente?.telefono || ev.cliente?.urlMapa) && (
+                        <div className="flex flex-wrap gap-2 pt-2">
+                          {ev.cliente?.telefono && (
+                            <a href={`tel:${ev.cliente.telefono}`} className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-[#0072BB] text-white font-bold text-sm">
+                              <Phone className="w-4 h-4" /> Llamar
+                            </a>
+                          )}
+                          {ev.cliente?.urlMapa && (
+                            <a href={ev.cliente.urlMapa} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl border-2 border-[#0072BB] text-[#0072BB] font-bold text-sm">
+                              <MapPin className="w-4 h-4" /> Ubicación
+                            </a>
+                          )}
+                        </div>
+                      )}
                     </>
                   );
                 })()
               )}
             </div>
-            <div className="p-5 border-t border-slate-200">
+            <div className="p-5 border-t border-slate-200 space-y-2">
+              {!isTransferencia(verItem) && (() => {
+                const ev = verItem as ItemEnvio;
+                const requiereTransferencia = ev.envio && ev.envio.sucursalEnvia !== ev.envio.sucursalFactura;
+                return (
+                  <div className="flex flex-wrap gap-2">
+                    {!ev.entregado && (
+                      <button type="button" onClick={() => markEntregado(ev)} className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-green-600 text-white font-bold text-sm">
+                        <Check className="w-4 h-4" /> Entregado
+                      </button>
+                    )}
+                    {ev.entregado && requiereTransferencia && !ev.mercaderiaTransferida && (
+                      <button type="button" onClick={() => markMercaderiaTransferida(ev)} className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-amber-600 text-white font-bold text-sm">
+                        <Truck className="w-4 h-4" /> Mercadería Transferida
+                      </button>
+                    )}
+                  </div>
+                );
+              })()}
               <button type="button" onClick={() => setModalVer(false)} className="w-full py-3 rounded-xl border-2 border-slate-300 text-slate-700 font-bold text-sm">Cerrar</button>
             </div>
           </div>
