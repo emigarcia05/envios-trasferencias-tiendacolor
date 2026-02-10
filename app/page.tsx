@@ -538,10 +538,16 @@ export default function Home() {
                         </div>
                       </div>
                       <div className="card-row-actions">
-                        {atrasado && <span className="card-badge-atrasado shrink-0">ATRASADO</span>}
-                        <button type="button" onClick={() => { setIdToDelete(t.id); setModalDelete(true); }} className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium bg-slate-100 text-slate-900">Eliminar</button>
-                        <button type="button" onClick={() => { setEditTransferencia(t); setModalTransferencia(true); }} className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium bg-slate-100 text-slate-900">Editar</button>
-                        <button type="button" onClick={() => openVer(t)} className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium text-white bg-[#338EC9]">Ver Transferencia</button>
+                        <div className="flex flex-wrap items-center gap-2">
+                          <button type="button" onClick={() => { setIdToDelete(t.id); setModalDelete(true); }} className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium bg-slate-100 text-slate-900">Eliminar</button>
+                          <button type="button" onClick={() => { setEditTransferencia(t); setModalTransferencia(true); }} className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium bg-slate-100 text-slate-900">Editar</button>
+                          <button type="button" onClick={() => openVer(t)} className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium text-white bg-[#338EC9]">Ver Transferencia</button>
+                        </div>
+                        {atrasado && (
+                          <div className="flex flex-wrap gap-2">
+                            <span className="card-badge-atrasado shrink-0">ATRASADO</span>
+                          </div>
+                        )}
                       </div>
                     </article>
                   );
@@ -592,13 +598,19 @@ export default function Home() {
                       </div>
                     </div>
                       <div className="card-row-actions">
-                        {atrasado && <span className="card-badge-atrasado shrink-0">ATRASADO</span>}
-                        {pendienteTransferencia && <span className="card-badge-atrasado shrink-0">Merc.Pendiente de Transferencia</span>}
-                        <button type="button" onClick={() => { setIdToDelete(e.id); setModalDelete(true); }} className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium bg-slate-100 text-slate-900">Eliminar</button>
-                        <button type="button" onClick={() => { setEditEnvio(e); setModalEnvio(true); }} className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium bg-slate-100 text-slate-900">Editar</button>
-                        <button type="button" onClick={() => openVer(e)} className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium text-white bg-[#338EC9]">Ver Envío</button>
-                        {e.entregado && (!requiereTransferencia || e.mercaderiaTransferida) && (
-                          <button type="button" onClick={() => openReutilizarEnvio(e)} className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium text-white bg-[#338EC9]">Reutilizar</button>
+                        <div className="flex flex-wrap items-center gap-2">
+                          <button type="button" onClick={() => { setIdToDelete(e.id); setModalDelete(true); }} className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium bg-slate-100 text-slate-900">Eliminar</button>
+                          <button type="button" onClick={() => { setEditEnvio(e); setModalEnvio(true); }} className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium bg-slate-100 text-slate-900">Editar</button>
+                          <button type="button" onClick={() => openVer(e)} className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium text-white bg-[#338EC9]">Ver Envío</button>
+                          {e.entregado && (!requiereTransferencia || e.mercaderiaTransferida) && (
+                            <button type="button" onClick={() => openReutilizarEnvio(e)} className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium text-white bg-[#338EC9]">Reutilizar</button>
+                          )}
+                        </div>
+                        {(atrasado || pendienteTransferencia) && (
+                          <div className="flex flex-wrap gap-2">
+                            {atrasado && <span className="card-badge-atrasado shrink-0">ATRASADO</span>}
+                            {pendienteTransferencia && <span className="card-badge-atrasado shrink-0">Merc.Pendiente de Transferencia</span>}
+                          </div>
                         )}
                       </div>
                   </article>
