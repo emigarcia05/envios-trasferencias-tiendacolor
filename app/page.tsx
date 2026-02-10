@@ -295,6 +295,15 @@ export default function Home() {
     }
   };
 
+  const markTransferenciaCompletada = async (t: ItemTransferencia) => {
+    const updated = { ...t, completada: true };
+    const ok = await saveItem(updated);
+    if (ok) {
+      await fetchItems();
+      setVerItem(updated);
+    }
+  };
+
   const confirmDelete = async () => {
     if (idToDelete) {
       await deleteItemById(idToDelete);
@@ -355,6 +364,7 @@ export default function Home() {
       detalle: formTransferencia.comentarios || undefined,
       pdfBase64: formTransferencia.pdfBase64 || undefined,
       pdfNombre: formTransferencia.pdfNombre || undefined,
+      completada: editTransferencia?.completada,
     };
     const ok = await saveItem(item);
     if (ok) {
@@ -679,7 +689,28 @@ export default function Home() {
               </div>
               <div>
                 <label className="block text-xs font-medium text-slate-700 mb-0.5">Comentarios</label>
-                <textarea value={formTransferencia.comentarios} onChange={(e) => setFormTransferencia((f) => ({ ...f, comentarios: e.target.value }))} className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm min-h-[80px]" placeholder="Detalle de la mercadería o observaciones" />
+                <textarea value={formTransferencia.comentarios} onChange={(e) => setFormTransferencia((f) => ({ ...f, comentarios: e.target.value }))} className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm min-h-[80px]" placeholder={"Ej:\n1 - LATEX INT COLORIN EMOCION BLANCO MATE 20 LTS"} />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-slate-700 mb-0.5">PDF (opcional)</label>
+                <input
+                  type="file"
+                  accept="application/pdf"
+                  className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-[#0072BB] file:text-white"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      const reader = new FileReader();
+                      reader.onload = () => {
+                        const dataUrl = reader.result as string;
+                        const base64 = dataUrl.includes(",") ? dataUrl.split(",")[1] : "";
+                        setFormTransferencia((f) => ({ ...f, pdfBase64: base64, pdfNombre: file.name }));
+                      };
+                      reader.readAsDataURL(file);
+                    }
+                  }}
+                />
+                {formTransferencia.pdfNombre && <p className="text-xs text-slate-500 mt-1">Adjunto: {formTransferencia.pdfNombre}</p>}
               </div>
               <div className="flex gap-2 pt-2">
                 <button type="button" onClick={() => { setModalTransferencia(false); setEditTransferencia(null); }} className="flex-1 py-2.5 rounded-xl border-2 border-slate-300 text-slate-700 font-bold text-sm">Cancelar</button>
@@ -719,6 +750,17 @@ export default function Home() {
                   <p className="text-sm flex items-center gap-2"><Store className="w-4 h-4 text-[#0072BB]" /><span className="font-bold">Desde:</span> {verItem.sucursalDesde}</p>
                   <p className="text-sm flex items-center gap-2"><Store className="w-4 h-4 text-[#0072BB]" /><span className="font-bold">Hasta:</span> {verItem.sucursalHasta}</p>
                   <p className="text-sm flex items-center gap-2"><MessageSquare className="w-4 h-4 text-[#0072BB]" /><span className="font-bold">Comentarios:</span> {verItem.comentarios || verItem.detalle || "-"}</p>
+                  {verItem.pdfBase64 && (
+                    <div className="pt-2">
+                      <button
+                        type="button"
+                        onClick={() => window.open(`data:application/pdf;base64,${verItem.pdfBase64}`, "_blank")}
+                        className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-[#0072BB] text-white font-bold text-sm"
+                      >
+                        <FileText className="w-4 h-4" /> Ver PDF
+                      </button>
+                    </div>
+                  )}
                 </>
               ) : (
                 (() => {
@@ -774,6 +816,18 @@ export default function Home() {
                       </button>
                     )}
                   </div>
+                );
+              })()}
+              {isTransferencia(verItem) && (() => {
+                const t = verItem as ItemTransferencia;
+                return (
+                  <button
+                    type="button"
+                    onClick={t.completada ? () => {} : () => markTransferenciaCompletada(t)}
+                    className={`w-full py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-1.5 ${t.completada ? "bg-slate-300 text-slate-500" : "bg-[#0072BB] text-white"}`}
+                  >
+                    <Truck className="w-4 h-4" /> {t.completada ? "Mercadería Transferida ✓" : "Mercadería Transferida"}
+                  </button>
                 );
               })()}
               <button type="button" onClick={() => setModalVer(false)} className="w-full py-3 rounded-xl border-2 border-slate-300 text-slate-700 font-bold text-sm">Cerrar</button>
