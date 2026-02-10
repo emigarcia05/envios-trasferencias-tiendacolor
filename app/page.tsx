@@ -730,6 +730,7 @@ export default function Home() {
                       <p className="text-sm flex items-center gap-2"><Calendar className="w-4 h-4 text-[#0072BB]" /><span className="font-bold">Fecha:</span> {ev.envio?.fecha ? formatDDMMYYYY(ev.envio.fecha) : "-"}</p>
                       <p className="text-sm flex items-center gap-2"><Clock className="w-4 h-4 text-[#0072BB]" /><span className="font-bold">Horario:</span> {ev.envio?.horaDesde} - {ev.envio?.horaHasta}</p>
                       <p className="text-sm flex items-center gap-2"><Store className="w-4 h-4 text-[#0072BB]" /><span className="font-bold">Sucursal:</span> {ev.envio?.sucursalEnvia}{requiereTransferencia ? ` (Factura: ${ev.envio?.sucursalFactura})` : ""}</p>
+                      <p className="text-sm flex items-center gap-2"><Tag className="w-4 h-4 text-[#0072BB]" /><span className="font-bold">Referencia:</span> {ev.cliente?.referencia || "-"}</p>
                       {(ev.cliente?.telefono || ev.cliente?.urlMapa) && (
                         <div className="flex flex-wrap gap-2 pt-2">
                           {ev.cliente?.telefono && (
@@ -738,7 +739,7 @@ export default function Home() {
                             </a>
                           )}
                           {ev.cliente?.urlMapa && (
-                            <a href={ev.cliente.urlMapa} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl border-2 border-[#0072BB] text-[#0072BB] font-bold text-sm">
+                            <a href={ev.cliente.urlMapa} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-[#0072BB] text-white font-bold text-sm">
                               <MapPin className="w-4 h-4" /> Ubicación
                             </a>
                           )}
@@ -754,15 +755,23 @@ export default function Home() {
                 const ev = verItem as ItemEnvio;
                 const requiereTransferencia = ev.envio && ev.envio.sucursalEnvia !== ev.envio.sucursalFactura;
                 return (
-                  <div className="flex flex-wrap gap-2">
-                    {!ev.entregado && (
-                      <button type="button" onClick={() => markEntregado(ev)} className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-green-600 text-white font-bold text-sm">
-                        <Check className="w-4 h-4" /> Entregado
-                      </button>
-                    )}
-                    {ev.entregado && requiereTransferencia && !ev.mercaderiaTransferida && (
-                      <button type="button" onClick={() => markMercaderiaTransferida(ev)} className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-amber-600 text-white font-bold text-sm">
-                        <Truck className="w-4 h-4" /> Mercadería Transferida
+                  <div className="flex flex-col gap-2">
+                    <button
+                      type="button"
+                      onClick={ev.entregado ? undefined : () => markEntregado(ev)}
+                      disabled={ev.entregado}
+                      className={`w-full py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-1.5 ${ev.entregado ? "bg-slate-300 text-slate-500 cursor-not-allowed" : "bg-green-600 text-white"}`}
+                    >
+                      <Check className="w-4 h-4" /> {ev.entregado ? "Entregado ✓" : "Entregado"}
+                    </button>
+                    {requiereTransferencia && (
+                      <button
+                        type="button"
+                        onClick={ev.mercaderiaTransferida ? undefined : () => markMercaderiaTransferida(ev)}
+                        disabled={ev.mercaderiaTransferida}
+                        className={`w-full py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-1.5 ${ev.mercaderiaTransferida ? "bg-slate-300 text-slate-500 cursor-not-allowed" : "bg-amber-600 text-white"}`}
+                      >
+                        <Truck className="w-4 h-4" /> {ev.mercaderiaTransferida ? "Mercadería Transferida ✓" : "Mercadería Transferida"}
                       </button>
                     )}
                   </div>
