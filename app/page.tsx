@@ -30,6 +30,8 @@ for (let h = 8; h <= 19; h++) {
 
 const SUCURSALES = ["Guaymallén", "Maipú"];
 
+const FORMAS_DE_PAGO = ["Pagado", "Efectivo", "Transferencia", "Tarjeta con posnet", "Tarjeta con link"];
+
 function escapeHtml(s: string | null | undefined): string {
   if (s == null) return "";
   const div = document.createElement("div");
@@ -127,6 +129,7 @@ export default function Home() {
   });
 
   const reutilizarDesdeRef = useRef<ItemEnvio | null>(null);
+  const reutilizarAbiertoRef = useRef(false);
 
   useEffect(() => {
     if (modalEnvio) {
@@ -300,6 +303,7 @@ export default function Home() {
 
   const openReutilizarEnvio = (ev: ItemEnvio) => {
     reutilizarDesdeRef.current = ev;
+    reutilizarAbiertoRef.current = true;
     setEditEnvio(null);
     setModalEnvio(true);
   };
@@ -371,6 +375,15 @@ export default function Home() {
     if (ok) {
       setModalEnvio(false);
       setEditEnvio(null);
+      if (reutilizarAbiertoRef.current) {
+        setFilterTipo("todo");
+        setFilterSucursal("todo");
+        setFilterEstado("pendientes");
+        setFilterFecha("hoy");
+        setDashboardFilter("todos");
+        setSearchCliente("");
+        reutilizarAbiertoRef.current = false;
+      }
     }
   };
 
@@ -618,11 +631,11 @@ export default function Home() {
 
       {/* Modal formulario Envío */}
       {modalEnvio && (
-        <div className="fixed inset-0 z-40 bg-slate-900/80 flex items-end sm:items-center justify-center p-4 overflow-y-auto" onClick={() => { setModalEnvio(false); setEditEnvio(null); }}>
+        <div className="fixed inset-0 z-40 bg-slate-900/80 flex items-end sm:items-center justify-center p-4 overflow-y-auto" onClick={() => { reutilizarAbiertoRef.current = false; setModalEnvio(false); setEditEnvio(null); }}>
           <div className="w-full max-w-lg max-h-[90vh] overflow-y-auto bg-slate-50 rounded-2xl shadow-2xl border-2 border-[#FFC107] my-4" onClick={(e) => e.stopPropagation()}>
             <div className="sticky top-0 bg-[#0072BB] px-5 py-4 flex items-center justify-between z-10">
               <h2 className="text-lg font-bold text-white">{editEnvio ? "Editar envío" : "Nuevo envío"}</h2>
-              <button type="button" onClick={() => { setModalEnvio(false); setEditEnvio(null); }} className="p-2 rounded-full hover:bg-white/20 text-white"><X className="w-5 h-5" /></button>
+              <button type="button" onClick={() => { reutilizarAbiertoRef.current = false; setModalEnvio(false); setEditEnvio(null); }} className="p-2 rounded-full hover:bg-white/20 text-white"><X className="w-5 h-5" /></button>
             </div>
             <form onSubmit={submitEnvio} className="p-5 space-y-3">
               {formError && <p className="text-sm text-red-600 bg-red-50 p-2 rounded-lg">{formError}</p>}
@@ -679,11 +692,42 @@ export default function Home() {
                 <input type="url" value={formEnvio.urlMapa} onChange={(e) => setFormEnvio((f) => ({ ...f, urlMapa: e.target.value }))} className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" placeholder="https://..." />
               </div>
               <div>
-                <label className="block text-xs font-medium text-slate-700 mb-0.5">Método de pago</label>
-                <input type="text" value={formEnvio.metodoPago} onChange={(e) => setFormEnvio((f) => ({ ...f, metodoPago: e.target.value }))} className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" placeholder="Efectivo, transferencia, etc." />
+                <label className="block text-xs font-medium text-slate-700 mb-0.5">Forma de pago</label>
+                <select value={formEnvio.metodoPago} onChange={(e) => setFormEnvio((f) => ({ ...f, metodoPago: e.target.value }))} className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm">
+                  <option value="">—</option>
+                  {FORMAS_DE_PAGO.map((op) => (
+                    <option key={op} value={op}>{op}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <span className="block text-xs font-medium text-slate-700 mb-0.5">PDF (opcional)</span>
+                <label htmlFor="envio-pdf-input" className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-[#0072BB] text-white font-bold text-sm cursor-pointer mt-1">
+                  <FileText className="w-4 h-4" /> Adjuntar PDF
+                </label>
+                <input
+                  id="envio-pdf-input"
+                  type="file"
+                  accept="application/pdf"
+                  className="sr-only"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      const reader = new FileReader();
+                      reader.onload = () => {
+                        const dataUrl = reader.result as string;
+                        const base64 = dataUrl.includes(",") ? dataUrl.split(",")[1] : "";
+                        setFormEnvio((f) => ({ ...f, pdfBase64: base64, pdfNombre: file.name }));
+                      };
+                      reader.readAsDataURL(file);
+                    }
+                    e.target.value = "";
+                  }}
+                />
+                {formEnvio.pdfNombre && <p className="text-xs text-slate-500 mt-1">Adjunto: {formEnvio.pdfNombre}</p>}
               </div>
               <div className="flex gap-2 pt-2">
-                <button type="button" onClick={() => { setModalEnvio(false); setEditEnvio(null); }} className="flex-1 py-2.5 rounded-xl border-2 border-slate-300 text-slate-700 font-bold text-sm">Cancelar</button>
+                <button type="button" onClick={() => { reutilizarAbiertoRef.current = false; setModalEnvio(false); setEditEnvio(null); }} className="flex-1 py-2.5 rounded-xl border-2 border-slate-300 text-slate-700 font-bold text-sm">Cancelar</button>
                 <button type="submit" className="flex-1 py-2.5 rounded-xl bg-[#0072BB] text-white font-bold text-sm">Guardar</button>
               </div>
             </form>
@@ -809,12 +853,21 @@ export default function Home() {
                       <p className="text-sm flex items-center gap-2"><Calendar className="w-4 h-4 text-[#0072BB]" /><span className="font-bold">Fecha:</span> {ev.envio?.fecha ? formatDDMMYYYY(ev.envio.fecha) : "-"}</p>
                       <p className="text-sm flex items-center gap-2"><Clock className="w-4 h-4 text-[#0072BB]" /><span className="font-bold">Horario:</span> {ev.envio?.horaDesde} - {ev.envio?.horaHasta}</p>
                       <p className="text-sm flex items-center gap-2"><Store className="w-4 h-4 text-[#0072BB]" /><span className="font-bold">Sucursal:</span> {ev.envio?.sucursalEnvia}{requiereTransferencia ? ` (Factura: ${ev.envio?.sucursalFactura})` : ""}</p>
-                      {(ev.cliente?.telefono || ev.cliente?.urlMapa) && (
+                      {(ev.cliente?.telefono || ev.cliente?.urlMapa || ev.mercaderia?.pdfBase64) && (
                         <div className="flex flex-wrap gap-2 pt-2">
                           {ev.cliente?.telefono && (
                             <a href={`tel:${ev.cliente.telefono}`} className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-[#0072BB] text-white font-bold text-sm">
                               <Phone className="w-4 h-4" /> Llamar
                             </a>
+                          )}
+                          {ev.mercaderia?.pdfBase64 && (
+                            <button
+                              type="button"
+                              onClick={() => window.open(`data:application/pdf;base64,${ev.mercaderia?.pdfBase64}`, "_blank")}
+                              className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-[#0072BB] text-white font-bold text-sm"
+                            >
+                              <FileText className="w-4 h-4" /> Mercadería
+                            </button>
                           )}
                           {ev.cliente?.urlMapa && (
                             <a href={ev.cliente.urlMapa} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-[#0072BB] text-white font-bold text-sm">
