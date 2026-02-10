@@ -12,11 +12,12 @@
     "next": "^14.2.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "neo4j-driver": "^5.15.0",
+    "pg": "^8.11.3",
     "lucide-react": "^0.344.0"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",
+    "@types/pg": "^8.10.9",
     "@types/react": "^18.2.0",
     "@types/react-dom": "^18.2.0",
     "autoprefixer": "^10.4.18",

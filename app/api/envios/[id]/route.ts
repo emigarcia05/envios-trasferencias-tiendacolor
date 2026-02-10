@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getAllItems, deleteItem } from "@/lib/neo4j";
+import { getAllItems, deleteItem } from "@/lib/db";
 
 export const dynamic = "force-dynamic";
 

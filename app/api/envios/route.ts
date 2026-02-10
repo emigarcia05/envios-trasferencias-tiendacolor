@@ -1,16 +1,16 @@
 import { NextResponse } from "next/server";
-import { getAllItems, saveItem } from "@/lib/neo4j";
+import { getAllItems, saveItem } from "@/lib/db";
 import type { Item } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
 
-/** GET: listar todos los ítems (envíos + transferencias). Si Neo4j no está disponible, devuelve [] para que la app cargue. */
+/** GET: listar todos los ítems (envíos + transferencias). Si la DB no está disponible, devuelve []. */
 export async function GET() {
   try {
     const items = await getAllItems();
     return NextResponse.json(items);
   } catch (e) {
-    console.error("GET /api/envios (Neo4j no disponible?):", e);
+    console.error("GET /api/envios (DB no disponible?):", e);
     return NextResponse.json([]);
   }
 }
