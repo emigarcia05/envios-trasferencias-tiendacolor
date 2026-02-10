@@ -499,19 +499,19 @@ export default function Home() {
                 const e = item as ItemEnvio;
                 const requiereTransferencia = e.envio && e.envio.sucursalEnvia !== e.envio.sucursalFactura;
                 const atrasado = isAtrasado(e);
+                const pendienteTransferencia = e.entregado && requiereTransferencia && !e.mercaderiaTransferida;
+                const esteticaAlerta = atrasado || pendienteTransferencia;
                 const fechaConDia = e.envio?.fecha ? formatFechaConDia(e.envio.fecha) : "";
                 const [diaSemana, ...resto] = fechaConDia.split(", ");
                 const ddmm = resto.length ? resto.join(", ").split("/").slice(0, 2).join("/") : "—";
                 const horaRango = e.envio ? `${e.envio.horaDesde} - ${e.envio.horaHasta}` : "";
-                const alertBadge = atrasado ? "" : (e.entregado && requiereTransferencia && !e.mercaderiaTransferida ? "Pend. transf." : "");
                 return (
                   <article key={e.id} className="card-fixed bg-slate-50 rounded-2xl border-2 border-[#FFC107] overflow-hidden shadow-md" data-id={e.id}>
-                    <div className={`card-sidebar w-12 min-w-[3rem] flex-shrink-0 flex flex-col items-center justify-center py-3 px-1 border-r-2 ${atrasado ? "card-sidebar-atrasado" : ""}`}>
+                    <div className={`card-sidebar w-12 min-w-[3rem] flex-shrink-0 flex flex-col items-center justify-center py-3 px-1 border-r-2 ${esteticaAlerta ? "card-sidebar-atrasado" : ""}`}>
                       <Truck className="w-6 h-6 text-white shrink-0" />
                       <span className="text-xs font-bold text-white uppercase mt-1.5 text-center">ENVÍO</span>
                     </div>
                     <div className="card-row-header grid grid-cols-3 bg-[#FFC107] relative">
-                      {alertBadge && <span className="absolute top-1 right-1 rounded-md bg-amber-700 text-white text-[10px] font-bold px-1.5 py-0.5">{alertBadge}</span>}
                       <div className="flex items-center justify-center p-1.5 text-center"><span className="text-slate-900 text-sm font-bold truncate">{e.envio?.sucursalEnvia}</span></div>
                       <div className="flex flex-col items-center justify-center p-1.5 text-center">
                         <span className="block text-slate-900 text-xs font-normal">{ddmm}</span>
@@ -541,12 +541,13 @@ export default function Home() {
                         <p className="text-sm text-slate-900 truncate">{e.cliente?.direccion || "-"}</p>
                       </div>
                     </div>
-                    <div className="card-row-actions">
-                      {atrasado && <span className="card-badge-atrasado shrink-0">ATRASADO</span>}
-                      <button type="button" onClick={() => { setIdToDelete(e.id); setModalDelete(true); }} className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium bg-slate-100 text-slate-900">Eliminar</button>
-                      <button type="button" onClick={() => { setEditEnvio(e); setModalEnvio(true); }} className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium bg-slate-100 text-slate-900">Editar</button>
-                      <button type="button" onClick={() => openVer(e)} className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium text-white bg-[#338EC9]">Ver Envío</button>
-                    </div>
+                      <div className="card-row-actions">
+                        {atrasado && <span className="card-badge-atrasado shrink-0">ATRASADO</span>}
+                        {pendienteTransferencia && <span className="card-badge-atrasado shrink-0">Merc.Pendiente de Transferencia</span>}
+                        <button type="button" onClick={() => { setIdToDelete(e.id); setModalDelete(true); }} className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium bg-slate-100 text-slate-900">Eliminar</button>
+                        <button type="button" onClick={() => { setEditEnvio(e); setModalEnvio(true); }} className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium bg-slate-100 text-slate-900">Editar</button>
+                        <button type="button" onClick={() => openVer(e)} className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium text-white bg-[#338EC9]">Ver Envío</button>
+                      </div>
                   </article>
                 );
               })}
@@ -630,12 +631,12 @@ export default function Home() {
                 <input type="text" value={formEnvio.direccion} onChange={(e) => setFormEnvio((f) => ({ ...f, direccion: e.target.value }))} className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" placeholder="Calle, número, localidad" />
               </div>
               <div>
-                <label className="block text-xs font-medium text-slate-700 mb-0.5">URL mapa</label>
-                <input type="url" value={formEnvio.urlMapa} onChange={(e) => setFormEnvio((f) => ({ ...f, urlMapa: e.target.value }))} className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" placeholder="https://..." />
-              </div>
-              <div>
                 <label className="block text-xs font-medium text-slate-700 mb-0.5">Referencia</label>
                 <input type="text" value={formEnvio.referencia} onChange={(e) => setFormEnvio((f) => ({ ...f, referencia: e.target.value }))} className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" placeholder="Referencia del pedido" />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-slate-700 mb-0.5">URL mapa</label>
+                <input type="url" value={formEnvio.urlMapa} onChange={(e) => setFormEnvio((f) => ({ ...f, urlMapa: e.target.value }))} className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" placeholder="https://..." />
               </div>
               <div>
                 <label className="block text-xs font-medium text-slate-700 mb-0.5">Método de pago</label>
@@ -758,18 +759,16 @@ export default function Home() {
                   <div className="flex flex-col gap-2">
                     <button
                       type="button"
-                      onClick={ev.entregado ? undefined : () => markEntregado(ev)}
-                      disabled={ev.entregado}
-                      className={`w-full py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-1.5 ${ev.entregado ? "bg-slate-300 text-slate-500 cursor-not-allowed" : "bg-green-600 text-white"}`}
+                      onClick={ev.entregado ? () => {} : () => markEntregado(ev)}
+                      className={`w-full py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-1.5 ${ev.entregado ? "bg-slate-300 text-slate-500" : "bg-[#0072BB] text-white"}`}
                     >
                       <Check className="w-4 h-4" /> {ev.entregado ? "Entregado ✓" : "Entregado"}
                     </button>
                     {requiereTransferencia && (
                       <button
                         type="button"
-                        onClick={ev.mercaderiaTransferida ? undefined : () => markMercaderiaTransferida(ev)}
-                        disabled={ev.mercaderiaTransferida}
-                        className={`w-full py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-1.5 ${ev.mercaderiaTransferida ? "bg-slate-300 text-slate-500 cursor-not-allowed" : "bg-amber-600 text-white"}`}
+                        onClick={ev.mercaderiaTransferida ? () => {} : () => markMercaderiaTransferida(ev)}
+                        className={`w-full py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-1.5 ${ev.mercaderiaTransferida ? "bg-slate-300 text-slate-500" : "bg-[#0072BB] text-white"}`}
                       >
                         <Truck className="w-4 h-4" /> {ev.mercaderiaTransferida ? "Mercadería Transferida ✓" : "Mercadería Transferida"}
                       </button>
