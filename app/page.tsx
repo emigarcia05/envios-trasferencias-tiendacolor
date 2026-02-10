@@ -892,7 +892,7 @@ export default function Home() {
                       onClick={() => toggleEntregado(ev)}
                       className={`w-full py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-1.5 ${ev.entregado ? "bg-slate-300 text-slate-500" : "bg-[#0072BB] text-white"}`}
                     >
-                      <Check className="w-4 h-4" /> {ev.entregado ? "Entregado ✓" : "Entregado"}
+                      <Truck className="w-4 h-4" /> {ev.entregado ? "Entregado ✓" : "Entregado"}
                     </button>
                     {requiereTransferencia && (
                       <button
@@ -900,7 +900,7 @@ export default function Home() {
                         onClick={() => toggleMercaderiaTransferida(ev)}
                         className={`w-full py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-1.5 ${ev.mercaderiaTransferida ? "bg-slate-300 text-slate-500" : "bg-[#0072BB] text-white"}`}
                       >
-                        <Truck className="w-4 h-4" /> {ev.mercaderiaTransferida ? "Mercadería Transferida ✓" : "Mercadería Transferida"}
+                        <FileText className="w-4 h-4" /> {ev.mercaderiaTransferida ? "Mercadería Transferida ✓" : "Mercadería Transferida"}
                       </button>
                     )}
                   </div>
@@ -914,7 +914,7 @@ export default function Home() {
                     onClick={() => toggleTransferenciaCompletada(t)}
                     className={`w-full py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-1.5 ${t.completada ? "bg-slate-300 text-slate-500" : "bg-[#0072BB] text-white"}`}
                   >
-                    <Truck className="w-4 h-4" /> {t.completada ? "Mercadería Transferida ✓" : "Mercadería Transferida"}
+                    <FileText className="w-4 h-4" /> {t.completada ? "Mercadería Transferida ✓" : "Mercadería Transferida"}
                   </button>
                 );
               })()}
