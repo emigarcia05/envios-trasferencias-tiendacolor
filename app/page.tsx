@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import {
   Truck,
   ArrowLeftRight,
@@ -126,6 +126,8 @@ export default function Home() {
     pdfNombre: "",
   });
 
+  const reutilizarDesdeRef = useRef<ItemEnvio | null>(null);
+
   useEffect(() => {
     if (modalEnvio) {
       if (editEnvio) {
@@ -144,6 +146,25 @@ export default function Home() {
           pdfBase64: editEnvio.mercaderia?.pdfBase64 ?? "",
           pdfNombre: editEnvio.mercaderia?.pdfNombre ?? "",
         });
+      } else if (reutilizarDesdeRef.current) {
+        const ev = reutilizarDesdeRef.current;
+        const hoy = new Date().toISOString().slice(0, 10);
+        setFormEnvio({
+          fecha: hoy,
+          horaDesde: ev.envio?.horaDesde ?? "08:00",
+          horaHasta: ev.envio?.horaHasta ?? "12:00",
+          sucursalEnvia: ev.envio?.sucursalEnvia ?? SUCURSALES[0] ?? "",
+          sucursalFactura: ev.envio?.sucursalFactura ?? SUCURSALES[0] ?? "",
+          nombre: ev.cliente?.nombre ?? "",
+          telefono: ev.cliente?.telefono ?? "",
+          direccion: ev.cliente?.direccion ?? "",
+          urlMapa: ev.cliente?.urlMapa ?? "",
+          referencia: ev.cliente?.referencia ?? "",
+          metodoPago: "",
+          pdfBase64: "",
+          pdfNombre: "",
+        });
+        reutilizarDesdeRef.current = null;
       } else {
         const hoy = new Date().toISOString().slice(0, 10);
         setFormEnvio({
@@ -277,8 +298,14 @@ export default function Home() {
     setModalVer(true);
   };
 
-  const markEntregado = async (ev: ItemEnvio) => {
-    const updated = { ...ev, entregado: true };
+  const openReutilizarEnvio = (ev: ItemEnvio) => {
+    reutilizarDesdeRef.current = ev;
+    setEditEnvio(null);
+    setModalEnvio(true);
+  };
+
+  const toggleEntregado = async (ev: ItemEnvio) => {
+    const updated = { ...ev, entregado: !ev.entregado };
     const ok = await saveItem(updated);
     if (ok) {
       await fetchItems();
@@ -286,8 +313,8 @@ export default function Home() {
     }
   };
 
-  const markMercaderiaTransferida = async (ev: ItemEnvio) => {
-    const updated = { ...ev, mercaderiaTransferida: true };
+  const toggleMercaderiaTransferida = async (ev: ItemEnvio) => {
+    const updated = { ...ev, mercaderiaTransferida: !ev.mercaderiaTransferida };
     const ok = await saveItem(updated);
     if (ok) {
       await fetchItems();
@@ -295,8 +322,8 @@ export default function Home() {
     }
   };
 
-  const markTransferenciaCompletada = async (t: ItemTransferencia) => {
-    const updated = { ...t, completada: true };
+  const toggleTransferenciaCompletada = async (t: ItemTransferencia) => {
+    const updated = { ...t, completada: !t.completada };
     const ok = await saveItem(updated);
     if (ok) {
       await fetchItems();
@@ -557,6 +584,9 @@ export default function Home() {
                         <button type="button" onClick={() => { setIdToDelete(e.id); setModalDelete(true); }} className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium bg-slate-100 text-slate-900">Eliminar</button>
                         <button type="button" onClick={() => { setEditEnvio(e); setModalEnvio(true); }} className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium bg-slate-100 text-slate-900">Editar</button>
                         <button type="button" onClick={() => openVer(e)} className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium text-white bg-[#338EC9]">Ver Envío</button>
+                        {e.entregado && (!requiereTransferencia || e.mercaderiaTransferida) && (
+                          <button type="button" onClick={() => openReutilizarEnvio(e)} className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium text-white bg-[#338EC9]">Reutilizar</button>
+                        )}
                       </div>
                   </article>
                 );
@@ -692,11 +722,15 @@ export default function Home() {
                 <textarea value={formTransferencia.comentarios} onChange={(e) => setFormTransferencia((f) => ({ ...f, comentarios: e.target.value }))} className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm min-h-[80px]" placeholder={"Ej:\n1 - LATEX INT COLORIN EMOCION BLANCO MATE 20 LTS"} />
               </div>
               <div>
-                <label className="block text-xs font-medium text-slate-700 mb-0.5">PDF (opcional)</label>
+                <span className="block text-xs font-medium text-slate-700 mb-0.5">PDF (opcional)</span>
+                <label htmlFor="transferencia-pdf-input" className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-[#0072BB] text-white font-bold text-sm cursor-pointer mt-1">
+                  <FileText className="w-4 h-4" /> Adjuntar PDF
+                </label>
                 <input
+                  id="transferencia-pdf-input"
                   type="file"
                   accept="application/pdf"
-                  className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-[#0072BB] file:text-white"
+                  className="sr-only"
                   onChange={(e) => {
                     const file = e.target.files?.[0];
                     if (file) {
@@ -708,6 +742,7 @@ export default function Home() {
                       };
                       reader.readAsDataURL(file);
                     }
+                    e.target.value = "";
                   }}
                 />
                 {formTransferencia.pdfNombre && <p className="text-xs text-slate-500 mt-1">Adjunto: {formTransferencia.pdfNombre}</p>}
@@ -770,10 +805,10 @@ export default function Home() {
                     <>
                       <p className="text-sm flex items-center gap-2"><User className="w-4 h-4 text-[#0072BB]" /><span className="font-bold">Nombre:</span> {ev.cliente?.nombre}</p>
                       <p className="text-sm flex items-center gap-2"><MapPin className="w-4 h-4 text-[#0072BB]" /><span className="font-bold">Dirección:</span> {ev.cliente?.direccion || "-"}</p>
+                      <p className="text-sm flex items-center gap-2"><Tag className="w-4 h-4 text-[#0072BB]" /><span className="font-bold">Referencia:</span> {ev.cliente?.referencia || "-"}</p>
                       <p className="text-sm flex items-center gap-2"><Calendar className="w-4 h-4 text-[#0072BB]" /><span className="font-bold">Fecha:</span> {ev.envio?.fecha ? formatDDMMYYYY(ev.envio.fecha) : "-"}</p>
                       <p className="text-sm flex items-center gap-2"><Clock className="w-4 h-4 text-[#0072BB]" /><span className="font-bold">Horario:</span> {ev.envio?.horaDesde} - {ev.envio?.horaHasta}</p>
                       <p className="text-sm flex items-center gap-2"><Store className="w-4 h-4 text-[#0072BB]" /><span className="font-bold">Sucursal:</span> {ev.envio?.sucursalEnvia}{requiereTransferencia ? ` (Factura: ${ev.envio?.sucursalFactura})` : ""}</p>
-                      <p className="text-sm flex items-center gap-2"><Tag className="w-4 h-4 text-[#0072BB]" /><span className="font-bold">Referencia:</span> {ev.cliente?.referencia || "-"}</p>
                       {(ev.cliente?.telefono || ev.cliente?.urlMapa) && (
                         <div className="flex flex-wrap gap-2 pt-2">
                           {ev.cliente?.telefono && (
@@ -801,7 +836,7 @@ export default function Home() {
                   <div className="flex flex-col gap-2">
                     <button
                       type="button"
-                      onClick={ev.entregado ? () => {} : () => markEntregado(ev)}
+                      onClick={() => toggleEntregado(ev)}
                       className={`w-full py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-1.5 ${ev.entregado ? "bg-slate-300 text-slate-500" : "bg-[#0072BB] text-white"}`}
                     >
                       <Check className="w-4 h-4" /> {ev.entregado ? "Entregado ✓" : "Entregado"}
@@ -809,7 +844,7 @@ export default function Home() {
                     {requiereTransferencia && (
                       <button
                         type="button"
-                        onClick={ev.mercaderiaTransferida ? () => {} : () => markMercaderiaTransferida(ev)}
+                        onClick={() => toggleMercaderiaTransferida(ev)}
                         className={`w-full py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-1.5 ${ev.mercaderiaTransferida ? "bg-slate-300 text-slate-500" : "bg-[#0072BB] text-white"}`}
                       >
                         <Truck className="w-4 h-4" /> {ev.mercaderiaTransferida ? "Mercadería Transferida ✓" : "Mercadería Transferida"}
@@ -823,7 +858,7 @@ export default function Home() {
                 return (
                   <button
                     type="button"
-                    onClick={t.completada ? () => {} : () => markTransferenciaCompletada(t)}
+                    onClick={() => toggleTransferenciaCompletada(t)}
                     className={`w-full py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-1.5 ${t.completada ? "bg-slate-300 text-slate-500" : "bg-[#0072BB] text-white"}`}
                   >
                     <Truck className="w-4 h-4" /> {t.completada ? "Mercadería Transferida ✓" : "Mercadería Transferida"}
