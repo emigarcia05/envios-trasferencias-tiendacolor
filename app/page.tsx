@@ -32,6 +32,20 @@ const SUCURSALES = ["Guaymallén", "Maipú"];
 
 const FORMAS_DE_PAGO = ["Pagado", "Efectivo", "Transferencia", "Tarjeta con posnet", "Tarjeta con link"];
 
+function openPdfBase64(base64: string) {
+  try {
+    const byteChars = atob(base64);
+    const byteNumbers = new Array(byteChars.length);
+    for (let i = 0; i < byteChars.length; i++) byteNumbers[i] = byteChars.charCodeAt(i);
+    const blob = new Blob([new Uint8Array(byteNumbers)], { type: "application/pdf" });
+    const url = URL.createObjectURL(blob);
+    window.open(url, "_blank");
+    setTimeout(() => URL.revokeObjectURL(url), 60000);
+  } catch {
+    window.open(`data:application/pdf;base64,${base64}`, "_blank");
+  }
+}
+
 function escapeHtml(s: string | null | undefined): string {
   if (s == null) return "";
   const div = document.createElement("div");
@@ -237,6 +251,9 @@ export default function Home() {
 
   const filtered = useMemo(() => {
     const hoy = new Date().toISOString().slice(0, 10);
+    const mananaDate = new Date();
+    mananaDate.setDate(mananaDate.getDate() + 1);
+    const manana = mananaDate.toISOString().slice(0, 10);
     let list = items;
     if (filterEstado === "pendientes") list = list.filter((i) => isTransferencia(i) || visibleEnVistaPrincipal(i));
     else if (filterEstado === "completo") list = list.filter((i) => isTransferencia(i) || esCompleto(i));
@@ -252,6 +269,11 @@ export default function Home() {
       list = list.filter((i) => {
         if (isTransferencia(i)) return (i.fecha || "") === hoy;
         return (i as ItemEnvio).envio?.fecha === hoy;
+      });
+    } else if (filterFecha === "manana") {
+      list = list.filter((i) => {
+        if (isTransferencia(i)) return (i.fecha || "") === manana;
+        return (i as ItemEnvio).envio?.fecha === manana;
       });
     }
     if (dashboardFilter === "atrasados") list = list.filter((i) => (isTransferencia(i) ? isAtrasadoTransfer(i) : isAtrasado(i as ItemEnvio)));
@@ -271,12 +293,27 @@ export default function Home() {
   }, [items, filterTipo, filterSucursal, filterEstado, filterFecha, dashboardFilter, searchCliente]);
 
   const resumen = useMemo(() => {
-    const list = items;
-    const pendientes = list.length;
-    const atrasados = list.filter((e) => (isTransferencia(e) ? isAtrasadoTransfer(e) : isAtrasado(e as ItemEnvio))).length;
-    const transfPend = list.filter((e) => !isTransferencia(e) && (e as ItemEnvio).envio && (e as ItemEnvio).envio!.sucursalEnvia !== (e as ItemEnvio).envio!.sucursalFactura && !(e as ItemEnvio).mercaderiaTransferida).length;
+    const hoy = new Date().toISOString().slice(0, 10);
+    const mananaDate = new Date();
+    mananaDate.setDate(mananaDate.getDate() + 1);
+    const manana = mananaDate.toISOString().slice(0, 10);
+    let baseList = items;
+    if (filterFecha === "hoy") {
+      baseList = baseList.filter((i) => {
+        if (isTransferencia(i)) return (i.fecha || "") === hoy;
+        return (i as ItemEnvio).envio?.fecha === hoy;
+      });
+    } else if (filterFecha === "manana") {
+      baseList = baseList.filter((i) => {
+        if (isTransferencia(i)) return (i.fecha || "") === manana;
+        return (i as ItemEnvio).envio?.fecha === manana;
+      });
+    }
+    const pendientes = baseList.filter((i) => isTransferencia(i) || visibleEnVistaPrincipal(i)).length;
+    const atrasados = baseList.filter((e) => (isTransferencia(e) ? isAtrasadoTransfer(e) : isAtrasado(e as ItemEnvio))).length;
+    const transfPend = baseList.filter((e) => !isTransferencia(e) && (e as ItemEnvio).envio && (e as ItemEnvio).envio!.sucursalEnvia !== (e as ItemEnvio).envio!.sucursalFactura && !(e as ItemEnvio).mercaderiaTransferida).length;
     return { pendientes, atrasados, transfPend };
-  }, [items]);
+  }, [items, filterFecha]);
 
   const saveItem = useCallback(
     async (item: Item) => {
@@ -452,6 +489,7 @@ export default function Home() {
                 <label htmlFor="filter-fecha" className="block text-xs font-medium text-white/90 uppercase tracking-wide mb-0.5">Fecha</label>
                 <select id="filter-fecha" value={filterFecha} onChange={(e) => { setFilterFecha(e.target.value); setDashboardFilter("todos"); }} className="w-full rounded-lg bg-white px-2.5 py-2 text-sm text-slate-900 dropdown-arrow appearance-none pr-9 border-0 shadow-sm">
                   <option value="hoy">Hoy</option>
+                  <option value="manana">Mañana</option>
                   <option value="todo">Todo</option>
                 </select>
               </div>
@@ -845,7 +883,7 @@ export default function Home() {
                     <div className="pt-2">
                       <button
                         type="button"
-                        onClick={() => window.open(`data:application/pdf;base64,${verItem.pdfBase64}`, "_blank")}
+                        onClick={() => openPdfBase64(verItem.pdfBase64!)}
                         className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-[#0072BB] text-white font-bold text-sm"
                       >
                         <FileText className="w-4 h-4" /> Ver PDF
@@ -875,7 +913,7 @@ export default function Home() {
                           {ev.mercaderia?.pdfBase64 && (
                             <button
                               type="button"
-                              onClick={() => window.open(`data:application/pdf;base64,${ev.mercaderia?.pdfBase64}`, "_blank")}
+                              onClick={() => ev.mercaderia?.pdfBase64 && openPdfBase64(ev.mercaderia.pdfBase64)}
                               className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-[#0072BB] text-white font-bold text-sm"
                             >
                               <FileText className="w-4 h-4" /> Mercadería
