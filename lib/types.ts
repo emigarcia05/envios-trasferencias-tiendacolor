@@ -27,6 +27,7 @@ export interface ItemEnvio {
   envio: EnvioData;
   cliente: ClienteData;
   mercaderia?: MercaderiaData;
+  comentarios?: string;
   entregado?: boolean;
   mercaderiaTransferida?: boolean;
   createdAt?: number;

@@ -129,6 +129,7 @@ export default function Home() {
     direccion: "",
     urlMapa: "",
     referencia: "",
+    comentarios: "",
     metodoPago: "",
     pdfBase64: "",
     pdfNombre: "",
@@ -159,6 +160,7 @@ export default function Home() {
           direccion: editEnvio.cliente?.direccion ?? "",
           urlMapa: editEnvio.cliente?.urlMapa ?? "",
           referencia: editEnvio.cliente?.referencia ?? "",
+          comentarios: editEnvio.comentarios ?? "",
           metodoPago: editEnvio.mercaderia?.metodoPago ?? "",
           pdfBase64: editEnvio.mercaderia?.pdfBase64 ?? "",
           pdfNombre: editEnvio.mercaderia?.pdfNombre ?? "",
@@ -177,6 +179,7 @@ export default function Home() {
           direccion: ev.cliente?.direccion ?? "",
           urlMapa: ev.cliente?.urlMapa ?? "",
           referencia: ev.cliente?.referencia ?? "",
+          comentarios: ev.comentarios ?? "",
           metodoPago: "",
           pdfBase64: "",
           pdfNombre: "",
@@ -195,6 +198,7 @@ export default function Home() {
           direccion: "",
           urlMapa: "",
           referencia: "",
+          comentarios: "",
           metodoPago: "",
           pdfBase64: "",
           pdfNombre: "",
@@ -387,6 +391,10 @@ export default function Home() {
       setFormError("El nombre del cliente es obligatorio.");
       return;
     }
+    if (!formEnvio.metodoPago?.trim()) {
+      setFormError("La forma de pago es obligatoria.");
+      return;
+    }
     const item: ItemEnvio = {
       id: editEnvio?.id ?? crypto.randomUUID(),
       envio: {
@@ -403,6 +411,7 @@ export default function Home() {
         urlMapa: formEnvio.urlMapa || undefined,
         referencia: formEnvio.referencia || undefined,
       },
+      comentarios: formEnvio.comentarios?.trim() || undefined,
       mercaderia:
         formEnvio.metodoPago || formEnvio.pdfBase64
           ? { metodoPago: formEnvio.metodoPago || undefined, pdfBase64: formEnvio.pdfBase64 || undefined, pdfNombre: formEnvio.pdfNombre || undefined }
@@ -634,6 +643,12 @@ export default function Home() {
                         <MapPin className="w-4 h-4 text-slate-900 shrink-0" />
                         <p className="text-sm text-slate-900 truncate">{e.cliente?.direccion || "-"}</p>
                       </div>
+                      {e.comentarios && (
+                        <div className="flex items-center gap-1.5 mt-1 min-w-0">
+                          <MessageSquare className="w-4 h-4 text-slate-900 shrink-0" />
+                          <p className="text-sm text-slate-900 truncate">{e.comentarios}</p>
+                        </div>
+                      )}
                     </div>
                       <div className="card-row-actions">
                         <div className="flex flex-wrap items-center gap-2">
@@ -738,13 +753,17 @@ export default function Home() {
                 <input type="text" value={formEnvio.referencia} onChange={(e) => setFormEnvio((f) => ({ ...f, referencia: e.target.value }))} className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" placeholder="Referencia del pedido" />
               </div>
               <div>
+                <label className="block text-xs font-medium text-slate-700 mb-0.5">Comentarios (opcional)</label>
+                <textarea value={formEnvio.comentarios} onChange={(e) => setFormEnvio((f) => ({ ...f, comentarios: e.target.value }))} className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm min-h-[60px]" placeholder="Observaciones o comentarios del pedido" />
+              </div>
+              <div>
                 <label className="block text-xs font-medium text-slate-700 mb-0.5">URL mapa</label>
                 <input type="url" value={formEnvio.urlMapa} onChange={(e) => setFormEnvio((f) => ({ ...f, urlMapa: e.target.value }))} className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" placeholder="https://..." />
               </div>
               <div>
-                <label className="block text-xs font-medium text-slate-700 mb-0.5">Forma de pago</label>
-                <select value={formEnvio.metodoPago} onChange={(e) => setFormEnvio((f) => ({ ...f, metodoPago: e.target.value }))} className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm">
-                  <option value="">—</option>
+                <label className="block text-xs font-medium text-slate-700 mb-0.5">Forma de pago *</label>
+                <select value={formEnvio.metodoPago} onChange={(e) => setFormEnvio((f) => ({ ...f, metodoPago: e.target.value }))} className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" required>
+                  <option value="">Seleccionar...</option>
                   {FORMAS_DE_PAGO.map((op) => (
                     <option key={op} value={op}>{op}</option>
                   ))}
@@ -903,6 +922,9 @@ export default function Home() {
                       <p className="text-sm flex items-center gap-2"><Calendar className="w-4 h-4 text-[#0072BB]" /><span className="font-bold">Fecha:</span> {ev.envio?.fecha ? formatDDMMYYYY(ev.envio.fecha) : "-"}</p>
                       <p className="text-sm flex items-center gap-2"><Clock className="w-4 h-4 text-[#0072BB]" /><span className="font-bold">Horario:</span> {ev.envio?.horaDesde} - {ev.envio?.horaHasta}</p>
                       <p className="text-sm flex items-center gap-2"><Store className="w-4 h-4 text-[#0072BB]" /><span className="font-bold">Sucursal:</span> {ev.envio?.sucursalEnvia}{requiereTransferencia ? ` (Factura: ${ev.envio?.sucursalFactura})` : ""}</p>
+                      {(ev.comentarios != null && ev.comentarios !== "") && (
+                        <p className="text-sm flex items-center gap-2"><MessageSquare className="w-4 h-4 text-[#0072BB]" /><span className="font-bold">Comentarios:</span> {ev.comentarios}</p>
+                      )}
                       {(ev.cliente?.telefono || ev.cliente?.urlMapa || ev.mercaderia?.pdfBase64) && (
                         <div className="flex flex-wrap gap-2 pt-2">
                           {ev.cliente?.telefono && (
