@@ -30,7 +30,7 @@ for (let h = 8; h <= 19; h++) {
 
 const SUCURSALES = ["Guaymallén", "Maipú"];
 
-const FORMAS_DE_PAGO = ["Pagado", "Efectivo", "Transferencia", "Tarjeta con posnet", "Tarjeta con link"];
+const FORMAS_DE_PAGO = ["Pagado", "Efectivo", "Transferencia", "Tarjeta con posnet", "Tarjeta con link", "Cuenta Corriente"];
 
 function openPdfBase64(base64: string) {
   try {
@@ -753,10 +753,6 @@ export default function Home() {
                 <input type="text" value={formEnvio.referencia} onChange={(e) => setFormEnvio((f) => ({ ...f, referencia: e.target.value }))} className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" placeholder="Referencia del pedido" />
               </div>
               <div>
-                <label className="block text-xs font-medium text-slate-700 mb-0.5">Comentarios (opcional)</label>
-                <textarea value={formEnvio.comentarios} onChange={(e) => setFormEnvio((f) => ({ ...f, comentarios: e.target.value }))} className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm min-h-[60px]" placeholder="Observaciones o comentarios del pedido" />
-              </div>
-              <div>
                 <label className="block text-xs font-medium text-slate-700 mb-0.5">URL mapa</label>
                 <input type="url" value={formEnvio.urlMapa} onChange={(e) => setFormEnvio((f) => ({ ...f, urlMapa: e.target.value }))} className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" placeholder="https://..." />
               </div>
@@ -768,6 +764,10 @@ export default function Home() {
                     <option key={op} value={op}>{op}</option>
                   ))}
                 </select>
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-slate-700 mb-0.5">Comentarios</label>
+                <textarea value={formEnvio.comentarios} onChange={(e) => setFormEnvio((f) => ({ ...f, comentarios: e.target.value }))} className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm min-h-[60px]" placeholder="Observaciones o comentarios del pedido" />
               </div>
               <div>
                 <span className="block text-xs font-medium text-slate-700 mb-0.5">PDF (opcional)</span>
