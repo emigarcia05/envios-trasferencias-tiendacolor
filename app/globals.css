@@ -75,12 +75,12 @@ input[type="file"] {
 }
 
 .card-fixed .card-row-actions {
-  min-height: 48px;
+  min-height: 36px;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  gap: 0.5rem;
-  padding: 0.5rem 0.75rem;
+  gap: 0.25rem;
+  padding: 0.25rem 0.5rem;
   border-top: 1px solid #e2e8f0;
   background: #f8fafc;
   overflow: hidden;

@@ -585,13 +585,13 @@ export default function Home() {
                         </div>
                       </div>
                       <div className="card-row-actions">
-                        <div className="flex flex-wrap items-center gap-2">
-                          <button type="button" onClick={() => { setIdToDelete(t.id); setModalDelete(true); }} className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium bg-slate-100 text-slate-900">Eliminar</button>
-                          <button type="button" onClick={() => { setEditTransferencia(t); setModalTransferencia(true); }} className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium bg-slate-100 text-slate-900">Editar</button>
-                          <button type="button" onClick={() => openVer(t)} className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium text-white bg-[#338EC9]">Ver Transferencia</button>
+                        <div className="flex flex-wrap items-center gap-1.5">
+                          <button type="button" onClick={() => { setIdToDelete(t.id); setModalDelete(true); }} className="inline-flex items-center gap-1 px-2 py-1.5 rounded-lg text-xs font-medium bg-slate-100 text-slate-900">Eliminar</button>
+                          <button type="button" onClick={() => { setEditTransferencia(t); setModalTransferencia(true); }} className="inline-flex items-center gap-1 px-2 py-1.5 rounded-lg text-xs font-medium bg-slate-100 text-slate-900">Editar</button>
+                          <button type="button" onClick={() => openVer(t)} className="inline-flex items-center gap-1 px-2 py-1.5 rounded-lg text-xs font-medium text-white bg-[#338EC9]">Ver Transferencia</button>
                         </div>
                         {atrasado && (
-                          <div className="flex flex-wrap gap-2">
+                          <div className="flex flex-wrap gap-1.5">
                             <span className="card-badge-atrasado shrink-0">ATRASADO</span>
                           </div>
                         )}
@@ -660,16 +660,16 @@ export default function Home() {
                       ) : null}
                     </div>
                       <div className="card-row-actions">
-                        <div className="flex flex-wrap items-center gap-2">
-                          <button type="button" onClick={() => { setIdToDelete(e.id); setModalDelete(true); }} className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium bg-slate-100 text-slate-900">Eliminar</button>
-                          <button type="button" onClick={() => { setEditEnvio(e); setModalEnvio(true); }} className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium bg-slate-100 text-slate-900">Editar</button>
-                          <button type="button" onClick={() => openVer(e)} className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium text-white bg-[#338EC9]">Ver Envío</button>
+                        <div className="flex flex-wrap items-center gap-1.5">
+                          <button type="button" onClick={() => { setIdToDelete(e.id); setModalDelete(true); }} className="inline-flex items-center gap-1 px-2 py-1.5 rounded-lg text-xs font-medium bg-slate-100 text-slate-900">Eliminar</button>
+                          <button type="button" onClick={() => { setEditEnvio(e); setModalEnvio(true); }} className="inline-flex items-center gap-1 px-2 py-1.5 rounded-lg text-xs font-medium bg-slate-100 text-slate-900">Editar</button>
+                          <button type="button" onClick={() => openVer(e)} className="inline-flex items-center gap-1 px-2 py-1.5 rounded-lg text-xs font-medium text-white bg-[#338EC9]">Ver Envío</button>
                           {e.entregado && (!requiereTransferencia || e.mercaderiaTransferida) && (
-                            <button type="button" onClick={() => openReutilizarEnvio(e)} className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium text-white bg-[#338EC9]">Reutilizar</button>
+                            <button type="button" onClick={() => openReutilizarEnvio(e)} className="inline-flex items-center gap-1 px-2 py-1.5 rounded-lg text-xs font-medium text-white bg-[#338EC9]">Reutilizar</button>
                           )}
                         </div>
                         {(atrasado || pendienteTransferencia) && (
-                          <div className="flex flex-wrap gap-2">
+                          <div className="flex flex-wrap gap-1.5">
                             {atrasado && <span className="card-badge-atrasado shrink-0">ATRASADO</span>}
                             {pendienteTransferencia && <span className="card-badge-atrasado shrink-0">Merc.Pendiente de Transferencia</span>}
                           </div>
@@ -705,8 +705,8 @@ export default function Home() {
 
       {/* Modal formulario Envío */}
       {modalEnvio && (
-        <div className="fixed inset-0 z-40 bg-slate-900/80 flex items-end sm:items-center justify-center p-4 overflow-y-auto" onClick={(e) => { if (e.target === e.currentTarget) { reutilizarAbiertoRef.current = false; setModalEnvio(false); setEditEnvio(null); } }}>
-          <div className="w-full max-w-lg max-h-[90vh] overflow-y-auto bg-slate-50 rounded-2xl shadow-2xl border-2 border-[#FFC107] my-4" onClick={(e) => e.stopPropagation()}>
+        <div className="fixed inset-0 z-40 bg-slate-900/80 flex items-end sm:items-center justify-center p-4 overflow-y-auto">
+          <div className="w-full max-w-lg max-h-[90vh] overflow-y-auto bg-slate-50 rounded-2xl shadow-2xl border-2 border-[#FFC107] my-4">
             <div className="sticky top-0 bg-[#0072BB] px-5 py-4 flex items-center justify-between z-10">
               <h2 className="text-lg font-bold text-white">{editEnvio ? "Editar envío" : "Nuevo envío"}</h2>
               <button type="button" onClick={() => { reutilizarAbiertoRef.current = false; setModalEnvio(false); setEditEnvio(null); }} className="p-2 rounded-full hover:bg-white/20 text-white"><X className="w-5 h-5" /></button>
@@ -815,8 +815,8 @@ export default function Home() {
 
       {/* Modal formulario Transferencia */}
       {modalTransferencia && (
-        <div className="fixed inset-0 z-40 bg-slate-900/80 flex items-end sm:items-center justify-center p-4 overflow-y-auto" onClick={(e) => { if (e.target === e.currentTarget) { setModalTransferencia(false); setEditTransferencia(null); } }}>
-          <div className="w-full max-w-lg max-h-[90vh] overflow-y-auto bg-slate-50 rounded-2xl shadow-2xl border-2 border-[#FFC107] my-4" onClick={(e) => e.stopPropagation()}>
+        <div className="fixed inset-0 z-40 bg-slate-900/80 flex items-end sm:items-center justify-center p-4 overflow-y-auto">
+          <div className="w-full max-w-lg max-h-[90vh] overflow-y-auto bg-slate-50 rounded-2xl shadow-2xl border-2 border-[#FFC107] my-4">
             <div className="sticky top-0 bg-[#0072BB] px-5 py-4 flex items-center justify-between z-10">
               <h2 className="text-lg font-bold text-white">{editTransferencia ? "Editar transferencia" : "Nueva transferencia"}</h2>
               <button type="button" onClick={() => { setModalTransferencia(false); setEditTransferencia(null); }} className="p-2 rounded-full hover:bg-white/20 text-white"><X className="w-5 h-5" /></button>
