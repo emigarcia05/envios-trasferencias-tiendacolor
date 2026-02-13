@@ -586,8 +586,8 @@ export default function Home() {
                       </div>
                       <div className="card-row-actions">
                         <div className="flex flex-wrap items-center gap-1.5">
-                          <button type="button" onClick={() => { setIdToDelete(t.id); setModalDelete(true); }} className="inline-flex items-center gap-1 px-2 py-1.5 rounded-lg text-xs font-medium bg-slate-100 text-slate-900">Eliminar</button>
-                          <button type="button" onClick={() => { setEditTransferencia(t); setModalTransferencia(true); }} className="inline-flex items-center gap-1 px-2 py-1.5 rounded-lg text-xs font-medium bg-slate-100 text-slate-900">Editar</button>
+                          <button type="button" onClick={() => { setIdToDelete(t.id); setModalDelete(true); }} className="inline-flex items-center gap-1 px-2 py-1.5 rounded-lg text-xs font-medium bg-slate-200 text-slate-800">Eliminar</button>
+                          <button type="button" onClick={() => { setEditTransferencia(t); setModalTransferencia(true); }} className="inline-flex items-center gap-1 px-2 py-1.5 rounded-lg text-xs font-medium bg-slate-200 text-slate-800">Editar</button>
                           <button type="button" onClick={() => openVer(t)} className="inline-flex items-center gap-1 px-2 py-1.5 rounded-lg text-xs font-medium text-white bg-[#338EC9]">Ver Transferencia</button>
                         </div>
                         {atrasado && (
@@ -661,8 +661,8 @@ export default function Home() {
                     </div>
                       <div className="card-row-actions">
                         <div className="flex flex-wrap items-center gap-1.5">
-                          <button type="button" onClick={() => { setIdToDelete(e.id); setModalDelete(true); }} className="inline-flex items-center gap-1 px-2 py-1.5 rounded-lg text-xs font-medium bg-slate-100 text-slate-900">Eliminar</button>
-                          <button type="button" onClick={() => { setEditEnvio(e); setModalEnvio(true); }} className="inline-flex items-center gap-1 px-2 py-1.5 rounded-lg text-xs font-medium bg-slate-100 text-slate-900">Editar</button>
+                          <button type="button" onClick={() => { setIdToDelete(e.id); setModalDelete(true); }} className="inline-flex items-center gap-1 px-2 py-1.5 rounded-lg text-xs font-medium bg-slate-200 text-slate-800">Eliminar</button>
+                          <button type="button" onClick={() => { setEditEnvio(e); setModalEnvio(true); }} className="inline-flex items-center gap-1 px-2 py-1.5 rounded-lg text-xs font-medium bg-slate-200 text-slate-800">Editar</button>
                           <button type="button" onClick={() => openVer(e)} className="inline-flex items-center gap-1 px-2 py-1.5 rounded-lg text-xs font-medium text-white bg-[#338EC9]">Ver Envío</button>
                           {e.entregado && (!requiereTransferencia || e.mercaderiaTransferida) && (
                             <button type="button" onClick={() => openReutilizarEnvio(e)} className="inline-flex items-center gap-1 px-2 py-1.5 rounded-lg text-xs font-medium text-white bg-[#338EC9]">Reutilizar</button>

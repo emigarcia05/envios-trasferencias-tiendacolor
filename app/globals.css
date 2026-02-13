@@ -80,7 +80,7 @@ input[type="file"] {
   flex-direction: column;
   justify-content: center;
   gap: 0.25rem;
-  padding: 0.25rem 0.5rem;
+  padding: 0.2rem 0.4rem;
   border-top: 1px solid #e2e8f0;
   background: #f8fafc;
   overflow: hidden;
