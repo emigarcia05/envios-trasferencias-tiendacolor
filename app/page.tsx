@@ -652,6 +652,12 @@ export default function Home() {
                           <p className="text-sm text-slate-900 truncate">{e.comentarios}</p>
                         </div>
                       ) : null}
+                      {e.mercaderia?.metodoPago ? (
+                        <div className="flex items-center gap-1.5 mt-1 min-w-0">
+                          <Tag className="w-4 h-4 text-slate-900 shrink-0" />
+                          <p className="text-sm text-slate-900 truncate">{e.mercaderia.metodoPago}</p>
+                        </div>
+                      ) : null}
                     </div>
                       <div className="card-row-actions">
                         <div className="flex flex-wrap items-center gap-2">
