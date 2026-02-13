@@ -120,8 +120,8 @@ export default function Home() {
 
   const [formEnvio, setFormEnvio] = useState({
     fecha: "",
-    horaDesde: "08:00",
-    horaHasta: "12:00",
+    horaDesde: "09:00",
+    horaHasta: "19:00",
     sucursalEnvia: SUCURSALES[0] ?? "",
     sucursalFactura: SUCURSALES[0] ?? "",
     nombre: "",
@@ -151,8 +151,8 @@ export default function Home() {
       if (editEnvio) {
         setFormEnvio({
           fecha: editEnvio.envio?.fecha ?? "",
-          horaDesde: editEnvio.envio?.horaDesde ?? "08:00",
-          horaHasta: editEnvio.envio?.horaHasta ?? "12:00",
+          horaDesde: editEnvio.envio?.horaDesde ?? "09:00",
+          horaHasta: editEnvio.envio?.horaHasta ?? "19:00",
           sucursalEnvia: editEnvio.envio?.sucursalEnvia ?? SUCURSALES[0] ?? "",
           sucursalFactura: editEnvio.envio?.sucursalFactura ?? SUCURSALES[0] ?? "",
           nombre: editEnvio.cliente?.nombre ?? "",
@@ -170,8 +170,8 @@ export default function Home() {
         const hoy = new Date().toISOString().slice(0, 10);
         setFormEnvio({
           fecha: hoy,
-          horaDesde: ev.envio?.horaDesde ?? "08:00",
-          horaHasta: ev.envio?.horaHasta ?? "12:00",
+          horaDesde: ev.envio?.horaDesde ?? "09:00",
+          horaHasta: ev.envio?.horaHasta ?? "19:00",
           sucursalEnvia: ev.envio?.sucursalEnvia ?? SUCURSALES[0] ?? "",
           sucursalFactura: ev.envio?.sucursalFactura ?? SUCURSALES[0] ?? "",
           nombre: ev.cliente?.nombre ?? "",
@@ -189,8 +189,8 @@ export default function Home() {
         const hoy = new Date().toISOString().slice(0, 10);
         setFormEnvio({
           fecha: hoy,
-          horaDesde: "08:00",
-          horaHasta: "12:00",
+          horaDesde: "09:00",
+          horaHasta: "19:00",
           sucursalEnvia: SUCURSALES[0] ?? "",
           sucursalFactura: SUCURSALES[0] ?? "",
           nombre: "",
@@ -641,14 +641,17 @@ export default function Home() {
                       </div>
                       <div className="flex items-center gap-1.5 mt-1 min-w-0">
                         <MapPin className="w-4 h-4 text-slate-900 shrink-0" />
-                        <p className="text-sm text-slate-900 truncate">{e.cliente?.direccion || "-"}</p>
+                        <p className="text-sm text-slate-900 truncate">
+                          {e.cliente?.direccion || "-"}
+                          {e.cliente?.referencia ? ` (${e.cliente.referencia})` : ""}
+                        </p>
                       </div>
-                      {e.comentarios && (
+                      {e.comentarios ? (
                         <div className="flex items-center gap-1.5 mt-1 min-w-0">
                           <MessageSquare className="w-4 h-4 text-slate-900 shrink-0" />
                           <p className="text-sm text-slate-900 truncate">{e.comentarios}</p>
                         </div>
-                      )}
+                      ) : null}
                     </div>
                       <div className="card-row-actions">
                         <div className="flex flex-wrap items-center gap-2">
@@ -696,7 +699,7 @@ export default function Home() {
 
       {/* Modal formulario Envío */}
       {modalEnvio && (
-        <div className="fixed inset-0 z-40 bg-slate-900/80 flex items-end sm:items-center justify-center p-4 overflow-y-auto" onClick={() => { reutilizarAbiertoRef.current = false; setModalEnvio(false); setEditEnvio(null); }}>
+        <div className="fixed inset-0 z-40 bg-slate-900/80 flex items-end sm:items-center justify-center p-4 overflow-y-auto" onClick={(e) => { if (e.target === e.currentTarget) { reutilizarAbiertoRef.current = false; setModalEnvio(false); setEditEnvio(null); } }}>
           <div className="w-full max-w-lg max-h-[90vh] overflow-y-auto bg-slate-50 rounded-2xl shadow-2xl border-2 border-[#FFC107] my-4" onClick={(e) => e.stopPropagation()}>
             <div className="sticky top-0 bg-[#0072BB] px-5 py-4 flex items-center justify-between z-10">
               <h2 className="text-lg font-bold text-white">{editEnvio ? "Editar envío" : "Nuevo envío"}</h2>
@@ -806,7 +809,7 @@ export default function Home() {
 
       {/* Modal formulario Transferencia */}
       {modalTransferencia && (
-        <div className="fixed inset-0 z-40 bg-slate-900/80 flex items-end sm:items-center justify-center p-4 overflow-y-auto" onClick={() => { setModalTransferencia(false); setEditTransferencia(null); }}>
+        <div className="fixed inset-0 z-40 bg-slate-900/80 flex items-end sm:items-center justify-center p-4 overflow-y-auto" onClick={(e) => { if (e.target === e.currentTarget) { setModalTransferencia(false); setEditTransferencia(null); } }}>
           <div className="w-full max-w-lg max-h-[90vh] overflow-y-auto bg-slate-50 rounded-2xl shadow-2xl border-2 border-[#FFC107] my-4" onClick={(e) => e.stopPropagation()}>
             <div className="sticky top-0 bg-[#0072BB] px-5 py-4 flex items-center justify-between z-10">
               <h2 className="text-lg font-bold text-white">{editTransferencia ? "Editar transferencia" : "Nueva transferencia"}</h2>
@@ -885,7 +888,7 @@ export default function Home() {
 
       {/* Modal Ver detalle (simplificado: solo muestra datos y cierra) */}
       {modalVer && verItem && (
-        <div className="fixed inset-0 z-40 bg-slate-900/80 flex items-end sm:items-center justify-center p-4" onClick={() => setModalVer(false)}>
+        <div className="fixed inset-0 z-40 bg-slate-900/80 flex items-end sm:items-center justify-center p-4" onClick={(e) => { if (e.target === e.currentTarget) setModalVer(false); }}>
           <div className="w-full max-w-lg max-h-[90vh] bg-slate-50 rounded-2xl overflow-hidden flex flex-col shadow-2xl border-2 border-[#FFC107]" onClick={(e) => e.stopPropagation()}>
             <div className="px-5 py-4 bg-[#0072BB] flex items-center justify-between">
               <h2 className="text-lg font-bold text-white">{isTransferencia(verItem) ? "Detalle de la transferencia" : "Detalle del envío"}</h2>
